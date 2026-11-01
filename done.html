@@ -106,7 +106,7 @@ async function renderList(fromCache){
     h+=`<details class="card"><summary><span class="nm">${esc(pn)} ${hd}</span></summary><div class="inner">
       ${Object.entries(node.types).map(([tn,c])=>`<button class="btn btn-sub" style="margin-bottom:8px;text-align:left" data-p="${esc(pn)}" data-t="${esc(tn)}">${esc(tn)} (完了: ${c}件)</button>`).join("")}
       <div style="border-top:1px dashed var(--line);margin-top:10px;padding-top:10px"><div class="lab">この物件をまとめて削除（全検査をゴミ箱へ）</div>
-      <input type="text" class="pwmask dpw2" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore placeholder="削除用パスワード"><button class="btn btn-danger" data-delp="${esc(pn)}">🗑️ この物件の検査をすべてゴミ箱へ移動</button></div></div></details>`;
+      <input type="text" class="pwmask dpw2" autocomplete="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore placeholder="削除用パスワード"><button class="btn btn-danger" data-delp="${esc(pn)}"><i class="i i-trash"></i> この物件の検査をすべてゴミ箱へ移動</button></div></div></details>`;
   });
   if(!any) h+=`<div class="info">該当する項目はありません。</div>`;
   view.innerHTML=h;
@@ -145,7 +145,7 @@ async function renderDetail(pn,tn){
   const show=showCount[key]||20, partial=show<total, vis=recs.slice(0,show);
   let h=`<div class="noprint"><button class="btn btn-sub" id="back">⬅ 戻る</button></div>`;
   if(partial) h+=`<div class="info noprint">通信量節約のため、画面には ${vis.length}／${total}件を表示しています。<b>印刷・PDF保存は、全${total}件がまとめて出力されます。</b></div>`;
-  h+=`<div class="row noprint"><button class="btn btn-amber" id="print">🖨️ 印刷／PDFとして保存</button></div>`;
+  h+=`<div class="row noprint"><button class="btn btn-amber" id="print"><i class="i i-printer"></i> 印刷／PDFとして保存</button></div>`;
   if(IS_ADMIN){
     h+=`<div class="delbox admin-only"><h3>完了物件の削除（管理者専用）</h3>
       <div style="font-size:14px">この検査記録の保存（上の「印刷／PDFとして保存」）が完了しましたら、一覧を整理するためにここから削除できます。<br><b>※削除してもデータは完全には消えず、後から「安全検証ツール」画面で復元できます。</b></div>
@@ -165,7 +165,7 @@ async function renderDetail(pn,tn){
         h+=`<div class="report-item"><div class="top"><div class="no">No.${n} ${loc}</div><div class="ap">${r.approved_date?`<span>承認日: ${esc(r.approved_date)}</span>`:""}</div></div>
           <div class="dt"><b>指摘内容：</b> ${esc(r.issue_detail||"")}</div>
           <table><tr><td><div class="cap">[ Before（指摘時） ]</div>${img(r.issue_photo_url)}</td><td><div class="cap">[ After（是正後） ]</div>${img(r.fix_photo_url)}</td></tr></table>
-          ${(withUndo&&IS_ADMIN)?`<div class="admin-only" style="text-align:right;margin-top:6px"><button class="btn btn-sub btn-s" data-undo="${esc(r.record_id)}">↩️ 完了取消</button></div>`:""}</div>`;
+          ${(withUndo&&IS_ADMIN)?`<div class="admin-only" style="text-align:right;margin-top:6px"><button class="btn btn-sub btn-s" data-undo="${esc(r.record_id)}"><i class="i i-undo"></i> 完了取消</button></div>`:""}</div>`;
         n++;
       });
     });

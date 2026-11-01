@@ -97,20 +97,20 @@ async function render(){
     .sort((x,y)=>x.name.localeCompare(y.name,"ja"));
   for(const k of [...sel.g]) if(!G.has(k)) sel.g.delete(k);
 
-  let h=`<h3 class="sec">🗑️ ゴミ箱（物件ごと）</h3><div class="cap">削除された物件と検査を、物件ごとにまとめています。「復元」「完全に削除」は、その物件の削除済みデータをまとめて処理します。</div>`;
+  let h=`<h3 class="sec"><i class="i i-trash"></i> ゴミ箱（物件ごと）</h3><div class="cap">削除された物件と検査を、物件ごとにまとめています。「復元」「完全に削除」は、その物件の削除済みデータをまとめて処理します。</div>`;
   if(!groups.length) h+=`<div class="info">削除済みのデータはありません。</div>`;
   groups.forEach(g=>{
     const kind=g.prop?`物件ごと削除（検査${g.ins.length}件を含む）`:`検査のみ削除（${g.ins.length}件）`;
     h+=`<div class="trow"><div class="hd"><input type="checkbox" data-g="${esc(g.key)}" ${sel.g.has(g.key)?"checked":""}>
-      <div><div class="nm">${g.area?`[${esc(g.area)}] `:""}${esc(g.name)}</div><div class="ph">📷 写真${g.photos}枚 ／ ${kind}</div></div></div>
-      <div class="btns row"><button class="btn btn-sub" data-rg="${esc(g.key)}">↩️ まとめて復元</button><button class="btn btn-danger" data-pg="${esc(g.key)}">🔥 まとめて完全に削除</button></div>`;
-    if(g.ins.length) h+=`<details style="margin-top:8px"><summary style="font-size:13px;color:var(--gray)">検査の内訳（${g.ins.length}件・1件ずつ処理したいとき）</summary>${g.ins.map(i=>`<div style="border-top:1px solid var(--line);padding:8px 0;margin-top:6px"><div style="font-size:14px;font-weight:700">${esc(i.inspection_type||"不明")} <span style="font-weight:400;color:var(--gray);font-size:12px">${esc(String(i.inspection_date||i.created_at||"").slice(0,10))}　📷${D.insCnt[i.inspection_id]||0}枚</span></div>
-      <div class="btns row"><button class="btn btn-sub" data-ri="${esc(i.inspection_id)}">↩️ 復元</button><button class="btn btn-danger" data-pi="${esc(i.inspection_id)}">🔥 完全に削除</button></div></div>`).join("")}</details>`;
+      <div><div class="nm">${g.area?`[${esc(g.area)}] `:""}${esc(g.name)}</div><div class="ph"><i class="i i-camera"></i> 写真${g.photos}枚 ／ ${kind}</div></div></div>
+      <div class="btns row"><button class="btn btn-sub" data-rg="${esc(g.key)}"><i class="i i-undo"></i> まとめて復元</button><button class="btn btn-danger" data-pg="${esc(g.key)}"><i class="i i-trash"></i> まとめて完全に削除</button></div>`;
+    if(g.ins.length) h+=`<details style="margin-top:8px"><summary style="font-size:13px;color:var(--gray)">検査の内訳（${g.ins.length}件・1件ずつ処理したいとき）</summary>${g.ins.map(i=>`<div style="border-top:1px solid var(--line);padding:8px 0;margin-top:6px"><div style="font-size:14px;font-weight:700">${esc(i.inspection_type||"不明")} <span style="font-weight:400;color:var(--gray);font-size:12px">${esc(String(i.inspection_date||i.created_at||"").slice(0,10))}　<i class="i i-camera"></i>${D.insCnt[i.inspection_id]||0}枚</span></div>
+      <div class="btns row"><button class="btn btn-sub" data-ri="${esc(i.inspection_id)}"><i class="i i-undo"></i> 復元</button><button class="btn btn-danger" data-pi="${esc(i.inspection_id)}"><i class="i i-trash"></i> 完全に削除</button></div></div>`).join("")}</details>`;
     h+=`</div>`;
   });
   h+=`<div id="bwg"></div>`;
-  h+=`<h3 class="sec">📦 保存容量と、使われていない写真の照合</h3><div class="cap">写真の保存容量（無料枠は1GB）と、どのデータにも紐づかない写真を調べます</div>
-    <button class="btn btn-primary" id="scan">🔍 容量を確認し、使われていない写真を照合する</button><div id="scanres"></div>`;
+  h+=`<h3 class="sec"><i class="i i-box"></i> 保存容量と、使われていない写真の照合</h3><div class="cap">写真の保存容量（無料枠は1GB）と、どのデータにも紐づかない写真を調べます</div>
+    <button class="btn btn-primary" id="scan"><i class="i i-search"></i> 容量を確認し、使われていない写真を照合する</button><div id="scanres"></div>`;
   view.innerHTML=h;
 
   const need=()=>{ if(!getPin()){ toast("上の欄にPASSを入力してください",false); return false; } return true; };
@@ -161,7 +161,7 @@ async function render(){
   };
   // チェックを入れても画面全体は読み込み直さない（位置が一番上に戻らないように、まとめて削除ボタンだけ差し替える）
   function refreshBulk(){
-    $("#bwg").innerHTML=sel.g.size?`<button class="btn btn-danger" id="bulkg">🔥 選択した${sel.g.size}件をまとめて完全に削除する</button>`:"";
+    $("#bwg").innerHTML=sel.g.size?`<button class="btn btn-danger" id="bulkg"><i class="i i-trash"></i> 選択した${sel.g.size}件をまとめて完全に削除する</button>`:"";
     $("#bulkg")?.addEventListener("click",()=>bulk($("#bulkg")));
   }
   refreshBulk();
@@ -175,11 +175,11 @@ async function render(){
       let r=`<div class="info">写真の保存容量：<b>${mb.toFixed(0)} MB</b> ／ 1,024 MB（${pct.toFixed(0)}%）　ファイル数：${s.files.toLocaleString()}件
         <div class="meter"><b style="width:${pct}%;background:${color}"></b></div>
         <small>目安：850MB超で削除、950MB超でProプランを検討</small></div>`;
-      if(!s.orphans.length) r+=`<div class="info ok">✨ どのデータにも紐づかない写真は0枚です。ストレージはきれいな状態です。</div>`;
-      else r+=`<div class="info warn">⚠️ どこにも紐づかない写真が <b>${s.orphans.length}枚</b>（約${(s.orphan_bytes/1048576).toFixed(1)}MB）見つかりました。
+      if(!s.orphans.length) r+=`<div class="info ok"><i class="i i-check-circle"></i> どのデータにも紐づかない写真は0枚です。ストレージはきれいな状態です。</div>`;
+      else r+=`<div class="info warn"><i class="i i-alert"></i> どこにも紐づかない写真が <b>${s.orphans.length}枚</b>（約${(s.orphan_bytes/1048576).toFixed(1)}MB）見つかりました。
         <div style="margin-top:6px;font-size:13px">削除する前に、写真を開いて中身を確認し、次の手順で別の方法でも照合してください（案内を参照）。</div>
         <details style="margin-top:6px"><summary>ファイル名（先頭20件・タップで写真を開く）</summary>${s.orphans.slice(0,20).map(n=>`<div style="font-size:12px;margin:4px 0"><a href="${SB_URL}/storage/v1/object/public/photos/${encodeURIComponent(n)}" target="_blank">${esc(n)}</a></div>`).join("")}</details>${s.recent_skipped?`<div style="font-size:12px;margin-top:6px">※24時間以内にアップされた写真 ${s.recent_skipped}枚 は、送信の途中の可能性があるため、数えていません。</div>`:""}</div>
-        <button class="btn btn-danger" id="delorph">🔥 使われていない写真 ${s.orphans.length}枚を削除する</button>`;
+        <button class="btn btn-danger" id="delorph"><i class="i i-trash"></i> 使われていない写真 ${s.orphans.length}枚を削除する</button>`;
       $("#scanres").innerHTML=r;
       $("#delorph")?.addEventListener("click",async()=>{
         if(!confirm(`使われていない写真 ${s.orphans.length}枚（約${(s.orphan_bytes/1048576).toFixed(1)}MB）を削除します。元に戻せません。別の方法での照合は済みましたか？`)) return;

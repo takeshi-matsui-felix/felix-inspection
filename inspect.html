@@ -245,7 +245,7 @@ async function renderReview(){
   $("#back").onclick=()=>{ VIEW="saved"; render(); };
   const drawPend=()=>{
     const urls=[];
-    $("#pend").innerHTML=PEND.length?`<div class="info warn">⚠️ この端末内に一時保存中のデータ（終了ボタンで一括送信されます）</div>`+PEND.map(r=>{
+    $("#pend").innerHTML=PEND.length?`<div class="info warn"><i class="i i-alert"></i> この端末内に一時保存中のデータ（終了ボタンで一括送信されます）</div>`+PEND.map(r=>{
       const u=URL.createObjectURL(r.full); urls.push(u);
       const head=(kikan()||r.floor_level==="一式")?"":`【${r.floor_level} ${r.area}】`.trim();
       return `<div class="rec unsent"><h3>${esc(head?head+" "+r.issue_detail:"【指摘内容】 "+r.issue_detail)}</h3><img class="pic s" src="${u}" alt="">

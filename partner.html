@@ -66,7 +66,7 @@
   <button id="changeArea" style="display:none">ホーム</button>
 </header>
 <style>#nav{display:flex;gap:6px;overflow-x:auto;background:#0E2338;padding:8px 10px;position:sticky;top:50px;z-index:9}#nav a{flex:none;color:#cfd8e3;text-decoration:none;font-size:13px;padding:7px 12px;border-radius:16px;white-space:nowrap}#nav a.on{background:#E8A33D;color:#2B2200;font-weight:700}</style>
-<nav id="nav"><a href="index.html?m=1">ホーム</a><a href="partner.html" class="on">是正実施</a></nav>
+<nav id="nav"><a href="index.html?m=1"><i class="i i-home"></i><span class="lb" data-s="ホーム">ホーム</span></a><a href="partner.html" class="on"><i class="i i-wrench"></i><span class="lb" data-s="是正">是正実施</span></a></nav>
 <main>
   <div id="view"></div>
 </main>
@@ -195,8 +195,8 @@ async function render(){
   if(!AREA){
     $("#changeArea").style.display = "none";
     view.innerHTML = `<h2 style="text-align:center;color:var(--navy)">エリアを選択</h2>
-      <button class="btn btn-area" style="background:var(--blue)" data-a="東海エリア">🛠️ 協力業者（東海エリア）</button>
-      <button class="btn btn-area" style="background:var(--amber);color:#2B2200" data-a="関東エリア">🛠️ 協力業者（関東エリア）</button>`;
+      <button class="btn btn-area" style="background:var(--blue)" data-a="東海エリア"><i class="i i-wrench"></i> 協力業者（東海エリア）</button>
+      <button class="btn btn-area" style="background:var(--amber);color:#2B2200" data-a="関東エリア"><i class="i i-wrench"></i> 協力業者（関東エリア）</button>`;
     view.querySelectorAll("[data-a]").forEach(b => b.onclick = () => { AREA = b.dataset.a; lsSet(AREA_KEY, AREA); render(); });
     return;
   }
@@ -291,7 +291,7 @@ async function renderDetail(pn, tn){
   }
   if(recs.length){
     const ws = [...new Set(recs.map(r=>r.work_type||"その他"))].sort();
-    html += `🛠️ 担当工種で絞り込む<select id="fwork"><option>すべて表示</option>${ws.map(f=>`<option>${esc(f)}</option>`).join("")}</select>`;
+    html += `<i class="i i-wrench"></i> 担当工種で絞り込む<select id="fwork"><option>すべて表示</option>${ws.map(f=>`<option>${esc(f)}</option>`).join("")}</select>`;
   }
   html += `<div id="recs"></div>`;
   view.innerHTML = html;
@@ -334,8 +334,8 @@ function recHtml(r, tn){
       </div>
     </div>
     <div class="row btns">
-      <label class="cam lib">📁 ライブラリ<input type="file" accept="image/*" data-cam="${esc(r.record_id)}"></label>
-      ${IS_MOBILE ? `<label class="cam shot">📷 ${pv ? "撮り直す" : "カメラ起動"}<input type="file" accept="image/*" capture="environment" data-cam="${esc(r.record_id)}"></label>` : ""}
+      <label class="cam lib"><i class="i i-image"></i> ライブラリ<input type="file" accept="image/*" data-cam="${esc(r.record_id)}"></label>
+      ${IS_MOBILE ? `<label class="cam shot"><i class="i i-camera"></i> ${pv ? "撮り直す" : "カメラ起動"}<input type="file" accept="image/*" capture="environment" data-cam="${esc(r.record_id)}"></label>` : ""}
     </div>
     <div class="row"><button class="btn btn-primary" data-send="${esc(r.record_id)}">完了報告</button></div>
     <div class="msg"></div>

@@ -50,7 +50,7 @@ function lsDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
 function uuid(){ return crypto.randomUUID ? crypto.randomUUID() : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,c=>{const r=Math.random()*16|0;return (c==="x"?r:(r&3|8)).toString(16);}); }
 function todayISO(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 function todayStr(){ return todayISO().replace(/-/g,"/"); }
-function toast(m, ok=true){ const t=$("#toast"); t.textContent=(ok?"✅ ":"⚠️ ")+m; t.className=ok?"ok":"ng"; t.style.display="block"; clearTimeout(toast.h); toast.h=setTimeout(()=>t.style.display="none",ok?3000:5000); }
+function toast(m, ok=true){ const t=$("#toast"); t.textContent=""; t.insertAdjacentHTML("afterbegin",`<i class="i i-${ok?"check":"alert"}"></i> `); t.append(m); t.className=ok?"ok":"ng"; t.style.display="block"; clearTimeout(toast.h); toast.h=setTimeout(()=>t.style.display="none",ok?3000:5000); }
 const IS_MOBILE = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
 
 // ---- 通信 ----
@@ -168,8 +168,8 @@ function chips(name, opts, sel){
 function chipVal(root, name){ const e=(root||document).querySelector(`input[name="${CSS.escape(name)}"]:checked`); return e?e.value:""; }
 // 写真ボタン（ライブラリ／カメラ）
 function camButtons(attr, id, shotLabel){
-  return `<div class="btns"><label class="cam lib">📁 ライブラリ<input type="file" accept="image/*" ${attr}="${esc(id)}"></label>
-    ${IS_MOBILE?`<label class="cam shot">📷 ${shotLabel||"カメラ起動"}<input type="file" accept="image/*" capture="environment" ${attr}="${esc(id)}"></label>`:""}</div>`;
+  return `<div class="btns"><label class="cam lib"><i class="i i-image"></i> ライブラリ<input type="file" accept="image/*" ${attr}="${esc(id)}"></label>
+    ${IS_MOBILE?`<label class="cam shot"><i class="i i-camera"></i> ${shotLabel||"カメラ起動"}<input type="file" accept="image/*" capture="environment" ${attr}="${esc(id)}"></label>`:""}</div>`;
 }
 function spinBtn(btn, text){ btn.disabled=true; btn.dataset.t=btn.innerHTML; btn.innerHTML=`<span class="sp"></span>${text||"処理中…"}`; }
 function unspinBtn(btn){ btn.disabled=false; if(btn.dataset.t) btn.innerHTML=btn.dataset.t; }
@@ -199,10 +199,10 @@ function initPage(activeKey, need){
   document.body.insertAdjacentHTML("beforeend",`<div id="lb"><img alt=""></div><div id="toast"></div>`);
   $("#lb").onclick=()=>{$("#lb").style.display="none";};
   document.addEventListener("click",e=>{ const im=e.target.closest&&e.target.closest("[data-full]"); if(im){ $("#lb img").src=im.dataset.full; $("#lb").style.display="flex"; }});
-  const admin=[["home","ホーム","index.html?m=1"],["properties","物件登録","properties.html"],["inspect","検査実施","inspect.html"],["verify","検査内容確認","verify.html"],["admin","是正ダッシュボード","admin.html"],["done","完了分一覧","done.html"],["safety","安全検証ツール","safety.html"]];
-  const partner=[["home","ホーム","index.html?m=1"],["partner","是正実施","partner.html"]];
+  const admin=[["home","ホーム","index.html?m=1","home","ホーム"],["properties","物件登録","properties.html","building","物件"],["inspect","検査実施","inspect.html","camera","検査"],["verify","検査内容確認","verify.html","check-square","確認"],["admin","是正ダッシュボード","admin.html","wrench","是正"],["done","完了分一覧","done.html","file","完了"],["safety","安全検証ツール","safety.html","shield","安全"]];
+  const partner=[["home","ホーム","index.html?m=1","home","ホーム"],["partner","是正実施","partner.html","wrench","是正"]];
   const pages=(role&&role.role==="partner")?partner:admin;
-  document.querySelector("header").insertAdjacentHTML("afterend",`<nav id="nav">${pages.map(p=>`<a href="${p[2]}" class="${p[0]===activeKey?"on":""}">${p[1]}</a>`).join("")}</nav>`);
+  document.querySelector("header").insertAdjacentHTML("afterend",`<nav id="nav">${pages.map(p=>`<a href="${p[2]}" class="${p[0]===activeKey?"on":""}"><i class="i i-${p[3]}"></i><span class="lb" data-s="${p[4]}">${p[1]}</span></a>`).join("")}</nav>`);
 }
 
 // ---- 送信前の写真を端末内に保管（ブラウザを閉じても消えない：IndexedDB）----
@@ -284,7 +284,7 @@ function bindEditor(root, recs, tn, propName, afterSave){
 
 // ---- 物件変更（間違えて登録した検査のお引越し）----
 function moveHtml(others){
-  return `<details class="sub"><summary>🔄 この検査の物件を変更する（間違えて登録した場合）</summary>
+  return `<details class="sub"><summary><i class="i i-refresh"></i> この検査の物件を変更する（間違えて登録した場合）</summary>
     <div class="info warn">※この検査に含まれるすべての写真と指摘データを、別の物件に移動させます。</div>
     ${others.length?`<select id="mvsel">${others.map(x=>`<option value="${esc(x.property_id)}">[${esc(x.area)}] ${esc(x.property_name)}</option>`).join("")}</select>
       <button class="btn btn-amber" id="mvbtn">この物件にデータを移動する</button>`:`<div class="info">他に移動できる物件がありません。</div>`}</details>`;

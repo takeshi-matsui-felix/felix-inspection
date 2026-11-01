@@ -92,7 +92,7 @@ async function renderDetail(pn,tn){
   }
   if(recs.length){
     const ws=[...new Set(recs.map(r=>r.work_type||"その他"))].sort();
-    h+=`<div class="lab">🛠️ 担当工種で絞り込む</div><select id="fwork"><option>すべて表示</option>${ws.map(f=>`<option>${esc(f)}</option>`).join("")}</select>`;
+    h+=`<div class="lab"><i class="i i-wrench"></i> 担当工種で絞り込む</div><select id="fwork"><option>すべて表示</option>${ws.map(f=>`<option>${esc(f)}</option>`).join("")}</select>`;
   }
   h+=`<div class="info" id="cnt"></div>${moveHtml(others)}<div id="bulk"></div><div id="recs"></div>`;
   view.innerHTML=h;

@@ -58,9 +58,9 @@ const BRAND=`<div class="brand"><img src="icon-192.png" alt=""><b>Felix検査App
 function renderLogin(){
   document.documentElement.classList.remove("big");
   view.innerHTML=`${BRAND}<div class="logo">ログインアカウントの選択</div><div class="sub">※一度選択すると、次回以降はこの画面をスキップして開きます。</div>
-    <button class="role" style="background:#16324F" data-r="admin"><span class="ic">💻</span>管理者として入室</button>
-    <button class="role" style="background:#2C4F78" data-r="partner" data-a="東海エリア"><span class="ic">🛠️</span>協力業者（東海エリア）</button>
-    <button class="role" style="background:#E8A33D;color:#2B2200" data-r="partner" data-a="関東エリア"><span class="ic">🛠️</span>協力業者（関東エリア）</button>`;
+    <button class="role" style="background:#16324F" data-r="admin"><span class="ic"><i class="i i-laptop"></i></span>管理者として入室</button>
+    <button class="role" style="background:#2C4F78" data-r="partner" data-a="東海エリア"><span class="ic"><i class="i i-wrench"></i></span>協力業者（東海エリア）</button>
+    <button class="role" style="background:#E8A33D;color:#2B2200" data-r="partner" data-a="関東エリア"><span class="ic"><i class="i i-wrench"></i></span>協力業者（関東エリア）</button>`;
   view.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{
     if(b.dataset.r==="admin"){ renderAdminPin(); return; }
     setRole({role:b.dataset.r,area:b.dataset.a||""}); renderHome();
@@ -129,15 +129,15 @@ async function renderHome(){
   }
   if(resumeHref) h+=`<a class="menu resume" href="${esc(resumeHref)}">${esc(resumeText)}</a>`;
   if(admin){
-    h+=`<a class="menu main" href="inspect.html"><span class="ic">📷</span><span>新規検査を開始する<small>写真を撮って指摘を登録</small></span></a>
+    h+=`<a class="menu main" href="inspect.html"><span class="ic"><i class="i i-camera"></i></span><span>新規検査を開始する<small>写真を撮って指摘を登録</small></span></a>
       <div class="grid2">
-      <a class="menu" href="properties.html"><span class="ic">🏠</span>物件登録</a>
-      <a class="menu" href="verify.html"><span class="ic">✅</span>検査内容確認</a>
-      <a class="menu" href="admin.html"><span class="ic">🛠️</span>是正ダッシュボード</a>
-      <a class="menu" href="done.html"><span class="ic">📄</span>完了分一覧</a>
-      <a class="menu wide" href="safety.html"><span class="ic">🛡️</span>安全検証ツール</a></div>`;
+      <a class="menu" href="properties.html"><span class="ic"><i class="i i-home"></i></span>物件登録</a>
+      <a class="menu" href="verify.html"><span class="ic"><i class="i i-check-square"></i></span>検査内容確認</a>
+      <a class="menu" href="admin.html"><span class="ic"><i class="i i-wrench"></i></span>是正ダッシュボード</a>
+      <a class="menu" href="done.html"><span class="ic"><i class="i i-file"></i></span>完了分一覧</a>
+      <a class="menu wide" href="safety.html"><span class="ic"><i class="i i-shield"></i></span>安全検証ツール</a></div>`;
   }else{
-    h+=`<a class="menu main" href="partner.html"><span class="ic">🛠️</span><span>新規是正を開始する<small>写真を撮って是正を報告</small></span></a>`;
+    h+=`<a class="menu main" href="partner.html"><span class="ic"><i class="i i-wrench"></i></span><span>新規是正を開始する<small>写真を撮って是正を報告</small></span></a>`;
   }
   if(admin&&OLD_APP_URL) h+=`<a class="menu" style="font-size:13px;padding:10px;color:var(--gray)" href="${esc(OLD_APP_URL)}" target="_blank" rel="noopener">旧アプリ（予備）を開く</a>`;
   h+=`<div class="row"><button class="btn btn-sub" id="logout">ログアウト / アカウントの切り替え</button></div>`;

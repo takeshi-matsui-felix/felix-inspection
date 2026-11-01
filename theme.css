@@ -27,6 +27,29 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--ring);outline-of
 #toast{box-shadow:0 8px 24px #0005}
 .nophoto{background:var(--soft)}
 
+/* ---- 線アイコン（すべて線で統一。色は文字色に合わせて変わる） ---- */
+.i{display:inline-block;width:1.25em;height:1.25em;vertical-align:-.25em;background:currentColor;-webkit-mask:var(--ic) center/contain no-repeat;mask:var(--ic) center/contain no-repeat}
+.i-camera{--ic:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M3%208a2%202%200%200%201%202-2h2l1.5-2h7L17%206h2a2%202%200%200%201%202%202v10a2%202%200%200%201-2%202H5a2%202%200%200%201-2-2z%22/%3E%3Ccircle%20cx=%2212%22%20cy=%2213%22%20r=%223.5%22/%3E%3C/svg%3E")}
+.i-image{--ic:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Crect%20x=%223%22%20y=%224%22%20width=%2218%22%20height=%2216%22%20rx=%222%22/%3E%3Ccircle%20cx=%229%22%20cy=%2210%22%20r=%221.6%22/%3E%3Cpath%20d=%22M21%2016l-5-5-8%209%22/%3E%3C/svg%3E")}
+.i-home{--ic:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M3%2011l9-8%209%208%22/%3E%3Cpath%20d=%22M5%2010v10h14V10%22/%3E%3Cpath%20d=%22M10%2020v-6h4v6%22/%3E%3C/svg%3E")}
+.i-check-square{--ic:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Crect%20x=%223%22%20y=%223%22%20width=%2218%22%20height=%2218%22%20rx=%223%22/%3E%3Cpath%20d=%22M8%2012l3%203%205-6%22/%3E%3C/svg%3E")}
+.i-wrench{--ic:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M14.7%206.3a1%201%200%200%200%200%201.4l1.6%201.6a1%201%200%200%200%201.4%200l3.77-3.77a6%206%200%200%201-7.94%207.94l-6.91%206.91a2.12%202.12%200%200%201-3-3l6.91-6.91a6%206%200%200%201%207.94-7.94l-3.76%203.76z%22/%3E%3C/svg%3E")}
+.i-file{--ic:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M14%203H7a2%202%200%200%200-2%202v14a2%202%200%200%200%202%202h10a2%202%200%200%200%202-2V8z%22/%3E%3Cpath%20d=%22M14%203v5h5%22/%3E%3Cpath%20d=%22M9%2013h6M9%2017h6%22/%3E%3C/svg%3E")}
+.i-shield{--ic:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M12%203l8%203v6c0%205-3.5%208-8%209-4.5-1-8-4-8-9V6z%22/%3E%3Cpath%20d=%22M9%2012l2%202%204-4%22/%3E%3C/svg%3E")}
+.i-laptop{--ic:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Crect%20x=%224%22%20y=%225%22%20width=%2216%22%20height=%2211%22%20rx=%222%22/%3E%3Cpath%20d=%22M2%2020h20%22/%3E%3C/svg%3E")}
+.i-mail{--ic:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Crect%20x=%223%22%20y=%225%22%20width=%2218%22%20height=%2214%22%20rx=%222%22/%3E%3Cpath%20d=%22M3%207l9%206%209-6%22/%3E%3C/svg%3E")}
+.i-refresh{--ic:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M20%2011a8%208%200%200%200-14-4L4%209%22/%3E%3Cpath%20d=%22M4%204v5h5%22/%3E%3Cpath%20d=%22M4%2013a8%208%200%200%200%2014%204l2-2%22/%3E%3Cpath%20d=%22M20%2020v-5h-5%22/%3E%3C/svg%3E")}
+.i-alert{--ic:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M12%203L2%2020h20z%22/%3E%3Cpath%20d=%22M12%2010v5%22/%3E%3Cpath%20d=%22M12%2018v.5%22/%3E%3C/svg%3E")}
+.i-alert-circle{--ic:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Ccircle%20cx=%2212%22%20cy=%2212%22%20r=%229%22/%3E%3Cpath%20d=%22M12%207v6%22/%3E%3Cpath%20d=%22M12%2016.5v.5%22/%3E%3C/svg%3E")}
+.i-printer{--ic:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M7%209V3h10v6%22/%3E%3Crect%20x=%224%22%20y=%229%22%20width=%2216%22%20height=%228%22%20rx=%222%22/%3E%3Cpath%20d=%22M7%2014h10v7H7z%22/%3E%3C/svg%3E")}
+.i-trash{--ic:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M4%207h16%22/%3E%3Cpath%20d=%22M9%207V4h6v3%22/%3E%3Cpath%20d=%22M6%207l1%2013h10l1-13%22/%3E%3Cpath%20d=%22M10%2011v6M14%2011v6%22/%3E%3C/svg%3E")}
+.i-undo{--ic:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M9%2014L4%209l5-5%22/%3E%3Cpath%20d=%22M4%209h10a6%206%200%200%201%200%2012h-3%22/%3E%3C/svg%3E")}
+.i-box{--ic:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M3%208l9-5%209%205v9l-9%205-9-5z%22/%3E%3Cpath%20d=%22M3%208l9%205%209-5M12%2013v9%22/%3E%3C/svg%3E")}
+.i-search{--ic:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Ccircle%20cx=%2211%22%20cy=%2211%22%20r=%227%22/%3E%3Cpath%20d=%22M20%2020l-4-4%22/%3E%3C/svg%3E")}
+.i-check-circle{--ic:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Ccircle%20cx=%2212%22%20cy=%2212%22%20r=%229%22/%3E%3Cpath%20d=%22M8%2012l3%203%205-6%22/%3E%3C/svg%3E")}
+.i-check{--ic:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M5%2012l5%205%209-10%22/%3E%3C/svg%3E")}
+.i-building{--ic:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Crect%20x=%225%22%20y=%223%22%20width=%2214%22%20height=%2218%22%20rx=%221%22/%3E%3Cpath%20d=%22M9%207h2M13%207h2M9%2011h2M13%2011h2M10%2021v-4h4v4%22/%3E%3C/svg%3E")}
+
 /* ---- 協力業者：全体を大きく（現場で見やすいように） ---- */
 html.big main{zoom:1.14}
 html.big header h1{font-size:19px}
@@ -76,3 +99,21 @@ html.big #nav a{font-size:15px;padding:9px 14px}
   #lb{background:#04070bf2}
 }
 @media print{ :root{--surface:#fff} .card,.rec,.report-item,.report-head{box-shadow:none} }
+
+/* ---- ナビ：パソコンは上のタブ、スマホは画面下に固定（アイコン＋短い名前） ---- */
+#nav a{display:flex;align-items:center;gap:6px}
+@media (max-width:700px){
+  html body #nav{position:fixed;top:auto;bottom:0;left:0;right:0;z-index:50;justify-content:space-around;gap:0;padding:6px 4px calc(6px + env(safe-area-inset-bottom));background:#0B1624;border-top:1px solid #ffffff1f;box-shadow:0 -4px 16px #0004;overflow:hidden}
+  html body #nav a{flex:1 1 0;min-width:0;flex-direction:column;gap:2px;padding:6px 0;border-radius:12px;font-size:0;color:#9FB0C4}
+  html body #nav a .i{width:24px;height:24px}
+  html body #nav .lb{font-size:0}
+  html body #nav .lb::after{content:attr(data-s);font-size:10.5px;font-weight:700;letter-spacing:0}
+  html body #nav a.on{background:transparent;color:#F0B454}
+  html body #nav a.on .i{background:#F0B454}
+  main{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+  #toast{top:64px}
+}
+/* 状態の色を、記録カードの左端に出す */
+.rec:has(.st.wait){border-left:5px solid #D64545}
+.rec:has(.st.conf){border-left:5px solid #2E5FA3}
+label.cam{min-height:52px;border-radius:12px}
