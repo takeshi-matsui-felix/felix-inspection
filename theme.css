@@ -1,0 +1,78 @@
+/* Felix検査App 共通テーマ（全画面の最後に読み込む）
+   ・見た目の磨き込み（余白・影・押しやすさ）
+   ・ダークモード（端末の設定に自動で合わせる。印刷は常に明るい配色）
+   ・協力業者の画面は html.big で全体を大きく表示 */
+:root{--surface:#fff;--text:#1d2733;--soft:#eef0f4;--shadow:0 1px 2px #16324f14,0 4px 14px #16324f0f;--ring:#E8A33D}
+html{-webkit-tap-highlight-color:transparent}
+body{color:var(--text);line-height:1.55;font-size:15px}
+header{background:linear-gradient(180deg,#1a3a5c,#16324F);box-shadow:0 2px 8px #0003;padding-top:max(12px,env(safe-area-inset-top))}
+header h1{letter-spacing:.02em}
+main{padding-bottom:calc(90px + env(safe-area-inset-bottom))}
+.card,.rec,.trow,.report-head,.report-item{background:var(--surface);box-shadow:var(--shadow);border-color:transparent}
+.card,.rec,.trow{border-radius:14px}
+.btn{min-height:48px;border-radius:12px;transition:transform .08s,opacity .15s}
+.btn:active,.menu:active,.role:active{transform:scale(.98)}
+.btn-primary{background:linear-gradient(180deg,#1d4168,#16324F);box-shadow:0 2px 6px #16324f40}
+.btn-amber{box-shadow:0 2px 6px #e8a33d55}
+.btn-sub,.btn-danger,.copy{background:var(--surface)}
+select,input[type=text],input[type=date],input[type=password],textarea{min-height:46px;background:var(--surface);color:var(--text);border-color:var(--line)}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--ring);outline-offset:1px;border-color:var(--ring)}
+::placeholder{color:#8a93a1}
+.chips span{min-height:40px;display:flex;align-items:center;background:var(--surface);border-radius:20px}
+.seg button{min-height:44px;background:var(--surface);color:var(--text)}
+.seg button.on{color:#fff}
+.type-btn,.prow .pname,details.sub{background:var(--surface)}
+.menu{background:var(--surface);box-shadow:var(--shadow);border-color:transparent}
+.info{border-radius:10px}
+#toast{box-shadow:0 8px 24px #0005}
+.nophoto{background:var(--soft)}
+
+/* ---- 協力業者：全体を大きく（現場で見やすいように） ---- */
+html.big main{zoom:1.14}
+html.big header h1{font-size:19px}
+html.big #nav a{font-size:15px;padding:9px 14px}
+
+/* ---- ダークモード（画面のみ。印刷には効かせない） ---- */
+@media screen and (prefers-color-scheme: dark){
+  :root{--bg:#0E141C;--surface:#172130;--text:#E8EDF3;--soft:#223044;--line:#2E3C50;--gray:#A3AFBF;--blue:#9DBDEB;--red:#FF8576;--green:#4CC38A;--shadow:0 1px 2px #0006;--ring:#F0B454}
+  body{background:var(--bg);color:var(--text)}
+  header{background:linear-gradient(180deg,#14233a,#0F1B2D)}
+  #nav{background:#080D14}
+  #nav a{color:#B7C4D4}
+  .banner,.warn{background:#3b3210;border-color:#5a4c18;color:#F3DC8F}
+  .info{background:#15304d;color:#D3E5FB}
+  .ok{background:#123826;color:#98E4BB}
+  .err,.reject{background:#3e1f1c;color:#FFA498}
+  .st.wait{background:#3e1f1c;color:#FFA498}
+  .st.conf{background:#15304d;color:#A8CBF6}
+  .btn-primary{background:linear-gradient(180deg,#3577BD,#2A66A8);color:#fff;box-shadow:none}
+  .btn-sub{color:#CFE1F7;border-color:var(--line)}
+  .btn-danger{color:#FF9A8C;border-color:#8a4038}
+  .copy{color:#CFE1F7;border-color:var(--line)}
+  .type-btn,.prow .pname{color:#E8EDF3}
+  .prow .pname.kanto{background:var(--amber);color:#2B2200}
+  .chips span{color:var(--text)}
+  .chips input:checked+span,.seg button.on{background:#2A66A8;border-color:#2A66A8;color:#fff}
+  .seg button{color:var(--text)}
+  .bar i,.meter{background:#2E3C50}
+  .badge{color:#B9C3D1}
+  .area-h{border-bottom-color:#4A5A70}
+  .lab,.w{color:#9DBDEB}
+  h3.sec,.logo,.brand b{color:#E8EDF3}
+  .menu{color:var(--text)}
+  .menu.main{background:linear-gradient(180deg,#3577BD,#2A66A8);color:#fff}
+  .menu.resume{background:#3b3210;color:#F3DC8F}
+  .delbox{background:#3e1f1c;border-color:#8a4038;color:#FFA498}
+  ::placeholder{color:#6f7c8d}
+  select,input,textarea{color-scheme:dark}
+  /* 文字の色が直接書かれている部分を、暗い背景で読める色に */
+  [style*="color:#D64545"]{color:#FF8C7E!important}
+  [style*="color:#2E5FA3"]{color:#8FB8F0!important}
+  [style*="color:#B8790A"]{color:#F0B454!important}
+  [style*="background:#FDECEC"]{background:#3e1f1c!important}
+  [style*="background:#E9F0FB"]{background:#15304d!important}
+  [style*="background:#FFF6E5"]{background:#3b3210!important}
+  [style*="background:#fff"],[style*="background:#FFF"]{background:var(--surface)!important;color:var(--text)!important}
+  #lb{background:#04070bf2}
+}
+@media print{ :root{--surface:#fff} .card,.rec,.report-item,.report-head{box-shadow:none} }

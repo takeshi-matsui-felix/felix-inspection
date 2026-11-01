@@ -14,17 +14,32 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="stylesheet" href="common.css">
 <style>
-  .logo{text-align:center;color:var(--navy);font-weight:900;font-size:21px;margin:18px 0 6px}
-  .sub{text-align:center;color:var(--gray);font-size:13px;margin-bottom:24px}
-  .role{display:block;width:100%;max-width:340px;margin:12px auto;padding:18px;font-size:16px;font-weight:700;color:#fff;border:none;border-radius:10px;box-shadow:0 3px 8px #16324f2e;font-family:inherit}
-  .cnt{display:flex;gap:10px;margin-bottom:14px}
-  .cnt div{flex:1;border-radius:12px;padding:12px;text-align:center}
-  .cnt b{display:block;font-size:22px;font-weight:900}
+  .brand{display:flex;flex-direction:column;align-items:center;margin:14px 0 18px}
+  .brand img{width:76px;height:76px;border-radius:18px;box-shadow:0 6px 18px #16324f40}
+  .brand b{font-size:21px;color:var(--navy);margin-top:10px;font-weight:900;letter-spacing:.02em}
+  .brand small{color:var(--gray);font-size:13px;margin-top:2px}
+  .logo{text-align:center;color:var(--navy);font-weight:900;font-size:19px;margin:6px 0 4px}
+  .sub{text-align:center;color:var(--gray);font-size:13px;margin-bottom:20px}
+  .role{display:flex;align-items:center;gap:12px;width:100%;max-width:380px;margin:12px auto;padding:18px 20px;font-size:17px;font-weight:700;color:#fff;border:none;border-radius:14px;box-shadow:0 4px 12px #16324f33;font-family:inherit;text-align:left}
+  .role .ic{font-size:26px}
+  .cnt{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+  .cnt>*{border-radius:14px;padding:12px 8px;text-align:center;text-decoration:none;display:block}
+  .cnt b{display:block;font-size:26px;font-weight:900;line-height:1.2}
   .cnt small{font-size:11px;color:var(--gray);font-weight:700}
-  .menu{display:block;width:100%;text-align:center;padding:16px;margin:10px 0;border-radius:12px;background:#fff;border:1px solid var(--line);color:var(--navy);font-size:16px;font-weight:700;text-decoration:none}
-  .menu.main{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .cnt.one{grid-template-columns:1fr}
+  .menu{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:18px 16px;margin:10px 0;border-radius:14px;background:#fff;border:1px solid var(--line);color:var(--navy);font-size:17px;font-weight:700;text-decoration:none}
+  .menu .ic{font-size:26px;flex:none;width:34px;text-align:center}
+  .menu small{display:block;font-size:12px;font-weight:400;opacity:.8;margin-top:2px}
+  .menu.main{background:var(--navy);color:#fff;border-color:var(--navy);padding:22px 18px;font-size:19px}
   .menu.resume{background:#fff3cd;border-color:#ecd58a;color:#6b5400;font-size:14px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grid2 .menu{flex-direction:column;text-align:center;gap:6px;margin:0;padding:18px 8px;font-size:15px}
+  .grid2 .menu .ic{width:auto}
+  .grid2 .menu.wide{grid-column:1/-1;flex-direction:row;justify-content:center}
+  .foot{display:flex;flex-direction:column;gap:8px;margin-top:18px}
 </style>
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
 <header><h1>Felix検査App</h1></header>
@@ -39,11 +54,13 @@ document.body.insertAdjacentHTML("beforeend",`<div id="toast"></div>`);
 const FRESH_MS=12*3600*1000;
 const isMenuNav=/[?&]m=1/.test(location.search);   // メニューから来た場合は自動で前回の画面へ移動しない
 
+const BRAND=`<div class="brand"><img src="icon-192.png" alt=""><b>Felix検査App</b><small>現場の検査と是正をひとつに</small></div>`;
 function renderLogin(){
-  view.innerHTML=`<div class="logo">ログインアカウントの選択</div><div class="sub">※一度選択すると、次回以降はこの画面をスキップして開きます。</div>
-    <button class="role" style="background:#16324F" data-r="admin">💻 管理者として入室</button>
-    <button class="role" style="background:#2C4F78" data-r="partner" data-a="東海エリア">🛠️ 協力業者 (東海エリア)</button>
-    <button class="role" style="background:#E8A33D;color:#2B2200" data-r="partner" data-a="関東エリア">🛠️ 協力業者 (関東エリア)</button>`;
+  document.documentElement.classList.remove("big");
+  view.innerHTML=`${BRAND}<div class="logo">ログインアカウントの選択</div><div class="sub">※一度選択すると、次回以降はこの画面をスキップして開きます。</div>
+    <button class="role" style="background:#16324F" data-r="admin"><span class="ic">💻</span>管理者として入室</button>
+    <button class="role" style="background:#2C4F78" data-r="partner" data-a="東海エリア"><span class="ic">🛠️</span>協力業者（東海エリア）</button>
+    <button class="role" style="background:#E8A33D;color:#2B2200" data-r="partner" data-a="関東エリア"><span class="ic">🛠️</span>協力業者（関東エリア）</button>`;
   view.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{
     if(b.dataset.r==="admin"){ renderAdminPin(); return; }
     setRole({role:b.dataset.r,area:b.dataset.a||""}); renderHome();
@@ -74,14 +91,15 @@ async function renderHome(){
   const role=getRole(); if(!role){ renderLogin(); return; }
   const admin=role.role==="admin";
   view.innerHTML=`<div class="info">読み込み中…</div>`;
-  let h="";
+  let h=BRAND;
+  document.documentElement.classList.toggle("big",!admin);   // 協力業者は全体を大きく表示
   try{
     if(admin){
       const recs=await sget("inspection_records","select=progress_status&progress_status=in.(確認待ち,是正待ち,是正確認中)");
       const c=s=>recs.filter(r=>r.progress_status===s).length;
-      h+=`<div class="cnt"><div style="background:#E9F0FB"><b style="color:#2E5FA3">${c("確認待ち")}</b><small>確認待ち</small></div>
-        <div style="background:#FDECEC"><b style="color:#D64545">${c("是正待ち")}</b><small>是正待ち</small></div>
-        <div style="background:#FFF6E5"><b style="color:#B8790A">${c("是正確認中")}</b><small>是正確認中</small></div></div>`;
+      h+=`<div class="cnt"><a href="verify.html" style="background:#E9F0FB"><b style="color:#2E5FA3">${c("確認待ち")}</b><small>確認待ち</small></a>
+        <a href="admin.html" style="background:#FDECEC"><b style="color:#D64545">${c("是正待ち")}</b><small>是正待ち</small></a>
+        <a href="admin.html" style="background:#FFF6E5"><b style="color:#B8790A">${c("是正確認中")}</b><small>是正確認中</small></a></div>`;
     }else{
       const [recs,ins,props]=await Promise.all([
         sget("inspection_records","select=inspection_id&progress_status=eq.是正待ち"),
@@ -90,7 +108,7 @@ async function renderHome(){
       const areaOf={}; props.forEach(p=>areaOf[p.property_id]=p.area);
       const inArea=new Set(ins.filter(i=>areaOf[i.property_id]===role.area).map(i=>i.inspection_id));
       const n=recs.filter(r=>inArea.has(r.inspection_id)).length;
-      h+=`<div class="cnt"><div style="background:#FDECEC;padding:14px"><b style="color:#D64545;font-size:24px">${n}</b><small>対応が必要な指摘件数（${esc(role.area||"エリア未設定")}）</small></div></div>`;
+      h+=`<div class="cnt one"><a href="partner.html" style="background:#FDECEC;padding:18px"><b style="color:#D64545;font-size:38px">${n}</b><small style="font-size:13px">対応が必要な指摘件数（${esc(role.area||"エリア未設定")}）</small></a></div>`;
     }
   }catch(e){ h+=`<div class="err">件数を読み込めませんでした。電波の良い場所でお試しください。</div>`; }
 
@@ -111,11 +129,15 @@ async function renderHome(){
   }
   if(resumeHref) h+=`<a class="menu resume" href="${esc(resumeHref)}">${esc(resumeText)}</a>`;
   if(admin){
-    h+=`<a class="menu main" href="inspect.html">新規検査を開始する</a>
-      <a class="menu" href="properties.html">物件登録</a><a class="menu" href="verify.html">検査内容確認</a>
-      <a class="menu" href="admin.html">是正ダッシュボード</a><a class="menu" href="done.html">完了分一覧</a><a class="menu" href="safety.html">安全検証ツール</a>`;
+    h+=`<a class="menu main" href="inspect.html"><span class="ic">📷</span><span>新規検査を開始する<small>写真を撮って指摘を登録</small></span></a>
+      <div class="grid2">
+      <a class="menu" href="properties.html"><span class="ic">🏠</span>物件登録</a>
+      <a class="menu" href="verify.html"><span class="ic">✅</span>検査内容確認</a>
+      <a class="menu" href="admin.html"><span class="ic">🛠️</span>是正ダッシュボード</a>
+      <a class="menu" href="done.html"><span class="ic">📄</span>完了分一覧</a>
+      <a class="menu wide" href="safety.html"><span class="ic">🛡️</span>安全検証ツール</a></div>`;
   }else{
-    h+=`<a class="menu main" href="partner.html">新規是正を開始する</a>`;
+    h+=`<a class="menu main" href="partner.html"><span class="ic">🛠️</span><span>新規是正を開始する<small>写真を撮って是正を報告</small></span></a>`;
   }
   if(admin&&OLD_APP_URL) h+=`<a class="menu" style="font-size:13px;padding:10px;color:var(--gray)" href="${esc(OLD_APP_URL)}" target="_blank" rel="noopener">旧アプリ（予備）を開く</a>`;
   h+=`<div class="row"><button class="btn btn-sub" id="logout">ログアウト / アカウントの切り替え</button></div>`;

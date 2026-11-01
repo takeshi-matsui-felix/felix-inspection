@@ -57,6 +57,8 @@
   .sp{display:inline-block;width:14px;height:14px;border:2px solid #fff7;border-top-color:#fff;border-radius:50%;animation:s 0.8s linear infinite;vertical-align:-2px;margin-right:6px}
   @keyframes s{to{transform:rotate(360deg)}}
 </style>
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
 <header>
@@ -171,6 +173,7 @@ window.addEventListener("hashchange", render);
 
 // ==== 画面 ====
 let ROLE = null; try{ ROLE = JSON.parse(lsGet("felix_role")||"null"); }catch(e){}
+if(ROLE&&ROLE.role==="partner") document.documentElement.classList.add("big");   // 協力業者は全体を大きく表示
 if(!ROLE){ location.replace("index.html"); }
 let AREA = (ROLE && ROLE.role==="partner") ? ROLE.area : lsGet(AREA_KEY);
 let pending = {};   // record_id -> {full, thumb, url}（送信前の写真を画面内に保持）
