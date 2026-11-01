@@ -382,14 +382,14 @@ function recHtml(r,tn){
   const head=(tn.startsWith("【検査機関】")||floor==="一式")?"":`【${floor} ${w}】`.trim();
   const title=head?`${head} ${detail}`:`【指摘内容】 ${detail}`;
   const wait=r.progress_status==="是正待ち";
-  const before=r.issue_photo_url?`<img src="${esc(r.issue_photo_thumb_url||r.issue_photo_url)}" data-full="${esc(r.issue_photo_url)}" alt="">`:`<div class="nophoto">写真なし</div>`;
+  const before=r.issue_photo_url?`<img loading="lazy" decoding="async" src="${esc(r.issue_photo_thumb_url||r.issue_photo_url)}" data-full="${esc(r.issue_photo_url)}" alt="">`:`<div class="nophoto">写真なし</div>`;
   const pv=pending[id];
   const afterPrev=pv?`<img src="${pv.url}" alt="プレビュー">`:`<div class="nophoto">未撮影</div>`;
   let right;
   if(wait){
     right=`<h4>【是正写真を撮影（After）】</h4><div class="after">${afterPrev}</div>`;
   }else{
-    right=`<h4>【是正写真（After）】</h4>${r.fix_photo_url?`<img src="${esc(r.fix_photo_thumb_url||r.fix_photo_url)}" data-full="${esc(r.fix_photo_url)}" alt="">`:`<div class="nophoto">写真なし</div>`}`;
+    right=`<h4>【是正写真（After）】</h4>${r.fix_photo_url?`<img loading="lazy" decoding="async" src="${esc(r.fix_photo_thumb_url||r.fix_photo_url)}" data-full="${esc(r.fix_photo_url)}" alt="">`:`<div class="nophoto">写真なし</div>`}`;
   }
   let actions;
   if(wait){

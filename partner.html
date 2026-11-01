@@ -318,7 +318,7 @@ function recHtml(r, tn){
   const head = (tn.startsWith("【検査機関】") || floor === "一式") ? "" : `【${floor} ${area}】`.trim();
   const title = head ? `${head} ${detail}` : `【指摘内容】 ${detail}`;
   const before = r.issue_photo_url
-    ? `<img src="${esc(r.issue_photo_thumb_url||r.issue_photo_url)}" data-full="${esc(r.issue_photo_url)}" alt="指摘箇所">`
+    ? `<img loading="lazy" decoding="async" src="${esc(r.issue_photo_thumb_url||r.issue_photo_url)}" data-full="${esc(r.issue_photo_url)}" alt="指摘箇所">`
     : `<div class="nophoto">写真なし</div>`;
   const pv = pending[r.record_id];
   return `<div class="rec" data-id="${esc(r.record_id)}">

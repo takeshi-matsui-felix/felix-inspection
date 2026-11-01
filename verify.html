@@ -126,7 +126,7 @@ async function renderDetail(pn,tn){
         const head=(tn.startsWith("【検査機関】")||floor==="一式")?"":`【${floor} ${area}】`.trim();
         const title=head?`${head} ${detail}`:`【指摘内容】 ${detail}`;
         rh+=`<div class="rec" data-id="${esc(r.record_id)}"><h3>${esc(title)}</h3>
-          ${r.issue_photo_url?`<img class="pic" src="${esc(r.issue_photo_thumb_url||r.issue_photo_url)}" data-full="${esc(r.issue_photo_url)}" alt="">`:`<div class="nophoto">写真なし</div>`}
+          ${r.issue_photo_url?`<img loading="lazy" decoding="async" class="pic" src="${esc(r.issue_photo_thumb_url||r.issue_photo_url)}" data-full="${esc(r.issue_photo_url)}" alt="">`:`<div class="nophoto">写真なし</div>`}
           ${editorHtml(r,tn)}
           <div class="row"><button class="btn btn-primary" data-ok="${esc(r.record_id)}">個別承認（業者へ送る）</button></div></div>`;
       });
