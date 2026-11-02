@@ -117,7 +117,7 @@ async function renderList(fromCache){
   // 物件ごと一括でゴミ箱へ（復元・完全削除は「安全検証ツール」で物件ごとにまとめて行える）
   view.querySelectorAll("[data-delp]").forEach(b=>b.onclick=async()=>{
     const pn=b.dataset.delp, pw=b.parentElement.querySelector(".dpw2").value;
-    if(pw!==DELETE_PASSWORD){ toast("パスワードが違います",false); return; }
+    try{ await checkDeletePass(pw); }catch(e){ toast(e.message,false); return; }
     const mine=LC.ins.filter(i=>i.property_name===pn), ids=mine.map(i=>i.inspection_id);
     spinBtn(b,"確認中…");
     let other=0;
@@ -201,7 +201,7 @@ async function renderDetail(pn,tn){
     catch(e){ unspinBtn(b); toast("完了の取り消しに失敗しました。もう一度押してください",false); }
   });
   $("#dbtn")?.addEventListener("click",async()=>{
-    if($("#dpw").value!==DELETE_PASSWORD){ toast("パスワードが違います",false); return; }
+    try{ await checkDeletePass($("#dpw").value); }catch(e){ toast(e.message,false); return; }
     const btn=$("#dbtn"); spinBtn(btn,"処理中…");
     try{ for(const id of ids) await spatch("inspections","inspection_id",id,{is_deleted:true}); LC=null; toast("ゴミ箱に移動しました（復元は旧アプリの「安全検証ツール」から可能です）"); go(); }
     catch(e){ unspinBtn(btn); toast("ゴミ箱への移動に失敗しました。もう一度押してください",false); }

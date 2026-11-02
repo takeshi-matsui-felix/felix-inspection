@@ -142,7 +142,7 @@ async function startDelete(id){
         <div class="btns"><button class="btn btn-danger" id="d_yes">Yes（ゴミ箱へ移動）</button><button class="btn btn-sub" id="d_no">キャンセル</button></div>`;
       $("#d_no").onclick=()=>{delTarget=null; draw();};
       $("#d_yes").onclick=async()=>{
-        if($("#d_pw").value!==DELETE_PASSWORD){ toast("パスワードが違います",false); return; }
+        try{ await checkDeletePass($("#d_pw").value); }catch(e){ toast(e.message,false); return; }
         spinBtn($("#d_yes"),"処理中…");
         try{ await spatch("properties","property_id",id,{is_deleted:true}); toast("ゴミ箱へ移動しました"); delTarget=null; DATA=null; render(); }
         catch(e){ unspinBtn($("#d_yes")); toast("ゴミ箱への移動に失敗しました。もう一度押してください",false); }

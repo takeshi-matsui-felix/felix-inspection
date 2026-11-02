@@ -4,7 +4,7 @@
 const SB_URL = "https://vzuzeymvyftmfuaxrvtb.supabase.co";
 const SB_KEY = "sb_publishable_2y-rvfayu8BYs0oo-UOzGA_EQTBYLxm";
 const H = {apikey: SB_KEY, Authorization: "Bearer " + SB_KEY};
-const DELETE_PASSWORD = "5963";   // 物件の削除用（旧アプリと同じ。ログイン用PASSは最後に別途組み込む）
+// 削除用パスワードは画面のコードに置かず、サーバー（Edge Function）で照合する
 
 const SHANAI = ["社内検査(設計)", "社内検査(建設)", "社内検査(マーケ)", "社内検査(不動産)"];
 const SPECIAL = ["配筋検査", "躯体検査", "断熱検査", "中間検査"];   // 階層・部位を選ばない検査
@@ -78,6 +78,11 @@ async function callAdmin(pin, action, payload){
   let j={}; try{ j=await r.json(); }catch(e){}
   if(!r.ok) throw new Error(j.error||`管理用機能がエラーを返しました (${r.status})。Edge Functionの設定を確認してください`);
   return j;
+}
+async function checkDeletePass(pw){
+  let pin=""; try{ pin=sessionStorage.getItem("felix_pin")||""; }catch(e){}
+  if(!pin) throw new Error("いったんログアウトして、PASSを入れ直してください");
+  await callAdmin(pin,"check_delete",{delete_pass:pw});
 }
 async function spost(table, body){
   const r = await fetch(`${SB_URL}/rest/v1/${table}`, {method:"POST", headers:{...H,"Content-Type":"application/json","Prefer":"return=minimal"}, body: JSON.stringify(body)});
