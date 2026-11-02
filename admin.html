@@ -3,15 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>是正ダッシュボード（管理者）</title>
-<link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="icon-180.png">
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#16324F">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Felix検査">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>是正ダッシュボード（管理者）試作版</title>
 <style>
   :root{--navy:#16324F;--blue:#2C4F78;--amber:#E8A33D;--bg:#F3F5F8;--line:#D9DEE6;--red:#C0392B;--green:#2E9E64;--gray:#6B7482}
   *{box-sizing:border-box}
@@ -73,8 +65,9 @@
 <body>
 <header><h1 id="ttl">是正ダッシュボード（確認・実施）</h1></header>
 <style>#nav{display:flex;gap:6px;overflow-x:auto;background:#0E2338;padding:8px 10px;position:sticky;top:46px;z-index:9}#nav a{flex:none;color:#cfd8e3;text-decoration:none;font-size:13px;padding:7px 12px;border-radius:16px;white-space:nowrap}#nav a.on{background:#E8A33D;color:#2B2200;font-weight:700}</style>
-<nav id="nav"><a href="index.html?m=1"><i class="i i-home"></i><span class="lb" data-s="ホーム">ホーム</span></a><a href="properties.html"><i class="i i-building"></i><span class="lb" data-s="物件">物件登録</span></a><a href="inspect.html"><i class="i i-camera"></i><span class="lb" data-s="検査">検査実施</span></a><a href="verify.html"><i class="i i-check-square"></i><span class="lb" data-s="確認">検査内容確認</span></a><a href="admin.html" class="on"><i class="i i-wrench"></i><span class="lb" data-s="是正">是正ダッシュボード</span></a><a href="done.html"><i class="i i-file"></i><span class="lb" data-s="完了">完了分一覧</span></a><a href="safety.html"><i class="i i-shield"></i><span class="lb" data-s="安全">安全検証ツール</span></a></nav>
+<nav id="nav"><a href="home.html?m=1"><i class="i i-home"></i><span class="lb" data-s="ホーム">ホーム</span></a><a href="properties.html"><i class="i i-building"></i><span class="lb" data-s="物件">物件登録</span></a><a href="inspect.html"><i class="i i-camera"></i><span class="lb" data-s="検査">検査実施</span></a><a href="verify.html"><i class="i i-check-square"></i><span class="lb" data-s="確認">検査内容確認</span></a><a href="admin.html" class="on"><i class="i i-wrench"></i><span class="lb" data-s="是正">是正ダッシュボード</span></a><a href="done.html"><i class="i i-file"></i><span class="lb" data-s="完了">完了分一覧</span></a><a href="safety.html"><i class="i i-shield"></i><span class="lb" data-s="安全">安全検証ツール</span></a></nav>
 <main>
+  <div class="banner">試作版（管理者）：本番と同じデータにつながっています。試すときは「【テスト】」の物件だけを使ってください。</div>
   <div id="view"></div>
 </main>
 <div id="lb"><img alt=""></div>
@@ -82,7 +75,7 @@
 
 <script src="share.js"></script>
 <script>
-try{ const _r=JSON.parse(localStorage.getItem("felix_role")||"null"); if(!_r||_r.role!=="admin"||!_r.ts||Date.now()-_r.ts>12*3600*1000){ try{ sessionStorage.setItem("felix_next","admin.html"+location.hash); }catch(e){} location.replace("index.html"); } }catch(e){ location.replace("index.html"); }
+try{ const _r=JSON.parse(localStorage.getItem("felix_role")||"null"); if(!_r||_r.role!=="admin"||!_r.ts||Date.now()-_r.ts>12*3600*1000){ try{ sessionStorage.setItem("felix_next","admin.html"+location.hash); }catch(e){} location.replace("home.html"); } }catch(e){ location.replace("home.html"); }
 const SB_URL = "https://vzuzeymvyftmfuaxrvtb.supabase.co";
 const SB_KEY = "sb_publishable_2y-rvfayu8BYs0oo-UOzGA_EQTBYLxm";
 const H = {apikey: SB_KEY, Authorization: "Bearer " + SB_KEY};
@@ -267,7 +260,7 @@ async function renderList(fromCache){
       const sorted=[...list].sort((a,b)=>((a.delay_reason||"").trim()?0:1)-((b.delay_reason||"").trim()?0:1) || String(a.inspection_id).localeCompare(String(b.inspection_id)));
       const cur=sorted[0]?.delay_reason||"";
       const idsAttr=list.map(i=>i.inspection_id).join(",");
-      html+=`<div style="display:flex;gap:6px;align-items:stretch;margin-bottom:4px"><button class="type-btn" style="flex:1;margin:0" data-p="${esc(pn)}" data-t="${esc(tn)}">${esc(tn)}</button><button class="btn btn-sub btn-s" data-shp="${esc(pn)}" data-sht="${esc(tn)}" aria-label="この検査を共有"><i class="i i-share"></i></button></div>
+      html+=`<div style="display:flex;gap:6px;align-items:stretch;margin-bottom:4px"><button class="type-btn" style="flex:1;min-width:0;margin:0" data-p="${esc(pn)}" data-t="${esc(tn)}">${esc(tn)}</button><button class="btn btn-sub" style="flex:none;width:52px;padding:0;display:flex;align-items:center;justify-content:center" data-shp="${esc(pn)}" data-sht="${esc(tn)}" aria-label="この検査を共有"><i class="i i-share"></i></button></div>
         <div class="badge">是正写真待ち：${c.wait_fix}件 ／ 管理者確認待ち：${c.wait_conf}件</div>
         <input type="text" class="delay" data-ids="${esc(idsAttr)}" value="${esc(cur)}" placeholder="遅延理由を入力して入力欄の外をタップ">`;
     });
