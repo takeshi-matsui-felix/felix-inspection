@@ -23,6 +23,7 @@
 </main>
 <script src="templates.js"></script>
 <script src="common.js"></script>
+<script src="share.js"></script>
 <script>
 initPage("verify","admin");
 const view=$("#view");
@@ -116,7 +117,7 @@ async function renderDetail(pn,tn){
         for(const r of list){ try{ await spatch("inspection_records","record_id",r.record_id,{progress_status:"是正待ち"}); }catch(e){ ng++; } }
         LC=null;
         if(ng){ toast(`一括承認：${ng}件が失敗しました。再度お試しください`,false); render(); }
-        else { toast(`${list.length}件を承認しました。協力業者へ表示されます`); go(); }
+        else { toast(`${list.length}件を承認しました。協力業者へ表示されます`); go(); openShare(pn,tn); }
       };
     });
     const groups={}; list.forEach(r=>(groups[r.work_type||"その他"] ??= []).push(r));

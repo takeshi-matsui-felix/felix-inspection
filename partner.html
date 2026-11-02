@@ -173,8 +173,14 @@ window.addEventListener("hashchange", render);
 
 // ==== 画面 ====
 let ROLE = null; try{ ROLE = JSON.parse(lsGet("felix_role")||"null"); }catch(e){}
+// 共有リンク（…#p=物件&t=検査&a=エリア）から開いたとき
+{
+  const hq = new URLSearchParams(location.hash.replace(/^#/, ""));
+  if(!ROLE && ["東海エリア","関東エリア"].includes(hq.get("a"))){ ROLE = {role:"partner", area:hq.get("a")}; lsSet("felix_role", JSON.stringify(ROLE)); }
+  if(ROLE && ROLE.role==="admin" && hq.get("p") && hq.get("t")){ location.replace("admin.html#" + hq.toString()); }   // 管理者は是正ダッシュボードの同じ検査へ
+}
 if(ROLE&&ROLE.role==="partner") document.documentElement.classList.add("big");   // 協力業者は全体を大きく表示
-if(!ROLE){ location.replace("index.html"); }
+if(!ROLE){ try{ sessionStorage.setItem("felix_next","partner.html"+location.hash); }catch(e){} location.replace("index.html"); }
 let AREA = (ROLE && ROLE.role==="partner") ? ROLE.area : lsGet(AREA_KEY);
 let pending = {};   // record_id -> {full, thumb, url}（送信前の写真を画面内に保持）
 

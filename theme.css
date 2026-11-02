@@ -126,3 +126,11 @@ label.cam{min-height:52px;border-radius:12px}
 .pweye{position:absolute;right:4px;top:4px;width:42px;height:42px;border:none;background:transparent;color:var(--gray);display:flex;align-items:center;justify-content:center;border-radius:10px;padding:0}
 .pweye .i{width:22px;height:22px}
 .pwmask.show{-webkit-text-security:none;text-security:none}
+
+/* ---- 検査の共有 ---- */
+.i-share{--ic:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M4%2012v7a2%202%200%200%200%202%202h12a2%202%200%200%200%202-2v-7%22/%3E%3Cpath%20d=%22M16%206l-4-4-4%204%22/%3E%3Cpath%20d=%22M12%202v13%22/%3E%3C/svg%3E")}
+.i-link{--ic:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M10%2013a5%205%200%200%200%207.5.5l3-3a5%205%200%200%200-7-7l-1.7%201.7%22/%3E%3Cpath%20d=%22M14%2011a5%205%200%200%200-7.5-.5l-3%203a5%205%200%200%200%207%207l1.7-1.7%22/%3E%3C/svg%3E")}
+.i-copy{--ic:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Crect%20x=%229%22%20y=%229%22%20width=%2213%22%20height=%2213%22%20rx=%222%22/%3E%3Cpath%20d=%22M5%2015H4a2%202%200%200%201-2-2V4a2%202%200%200%201%202-2h9a2%202%200%200%201%202%202v1%22/%3E%3C/svg%3E")}
+#shsheet{position:fixed;inset:0;background:#0009;z-index:150;display:flex;align-items:flex-end;justify-content:center}
+#shsheet .shbox{background:var(--surface);color:var(--text);width:100%;max-width:560px;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));box-shadow:0 -8px 30px #0006}
+#shsheet .shtext{white-space:pre-wrap;word-break:break-all;background:var(--soft);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.6;margin:0 0 12px;font-family:inherit;max-height:32vh;overflow:auto}

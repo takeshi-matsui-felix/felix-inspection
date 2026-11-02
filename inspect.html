@@ -23,10 +23,12 @@
 </main>
 <script src="templates.js"></script>
 <script src="common.js"></script>
+<script src="share.js"></script>
 <script>
 initPage("inspect","admin");
 const view=$("#view");
 const OTHER="その他（フリー項目）";
+let JUST=null;         // 直前に送信を終えた検査（共有ボタン用）
 let SES=null;            // 実施中の検査（端末内に保存）{id,prop_id,name,type,inspector,date,prev_floor,prev_area}
 let PEND=[];             // 送信前の指摘（端末内に保存）
 let F=null;              // 入力中のフォーム
@@ -66,6 +68,7 @@ async function renderStart(){
   const pre=PROPS.find(p=>p.property_id===hashProp) || (SES&&PROPS.find(p=>p.property_id===SES.prop_id)) || PROPS[0];
   let area=pre?.area||"東海エリア", propId=pre?.property_id||"", q="";
   let h="";
+  if(JUST) h+=`<div class="info ok">検査を保存しました。協力業者へ知らせるときは、共有してください。<button class="btn btn-amber" id="sharejust" style="margin-top:8px"><i class="i i-share"></i> この検査をLINEなどで共有</button></div>`;
   if(SES){
     h+=`<div class="info warn"><b>前回の検査の続きがあります</b><br>${esc(SES.name)} / ${esc(SES.type)}（未送信 ${PEND.length}件）
       <div class="btns row"><button class="btn btn-primary" id="resume">続きから再開</button><button class="btn btn-danger" id="discard">破棄する</button></div></div>`;
@@ -87,6 +90,7 @@ async function renderStart(){
   $$('input[name="s_area"]').forEach(r=>r.onchange=()=>{propId="";fillProps();});
   $("#s_q").oninput=fillProps;
   $("#s_prop").onchange=e=>{propId=e.target.value;};
+  $("#sharejust")?.addEventListener("click",()=>openShare(JUST.prop,JUST.type));
   $("#resume")?.addEventListener("click",()=>{ VIEW="capture"; F=newForm(); render(); });
   $("#discard")?.addEventListener("click",async()=>{
     if(!confirm(`未送信の ${PEND.length}件 を含め、前回の検査の続きを破棄します。元に戻せません。よろしいですか？`)) return;
@@ -229,7 +233,7 @@ async function sendAll(){
       await IDB.del("pending",rec.temp_id); PEND=PEND.filter(x=>x.temp_id!==rec.temp_id); done++;
     }catch(e){ ng++; lastErr=e.message; }
   }
-  if(ng===0){ toast(`すべてのデータ（${done}件）を正常に保存しました`); await finish(); }
+  if(ng===0){ toast(`すべてのデータ（${done}件）を正常に保存しました`); JUST=(initial==="是正待ち"&&SES)?{prop:SES.name,type:SES.type}:null; await finish(); }
   else{
     unspinBtn(btn);
     toast(`${ng}件の送信に失敗しました。電波の良い場所でもう一度「終了する」を押してください`,false);
