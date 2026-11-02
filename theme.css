@@ -117,3 +117,12 @@ html.big #nav a{font-size:15px;padding:9px 14px}
 .rec:has(.st.wait){border-left:5px solid #D64545}
 .rec:has(.st.conf){border-left:5px solid #2E5FA3}
 label.cam{min-height:52px;border-radius:12px}
+
+/* ---- PASS入力：目のボタンで表示／非表示 ---- */
+.i-eye{--ic:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M2%2012s3.6-7%2010-7%2010%207%2010%207-3.6%207-10%207S2%2012%202%2012z%22/%3E%3Ccircle%20cx=%2212%22%20cy=%2212%22%20r=%223%22/%3E%3C/svg%3E")}
+.i-eye-off{--ic:url("data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2024%2024%22%20fill=%22none%22%20stroke=%22%23000%22%20stroke-width=%222%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22%3E%3Cpath%20d=%22M2%2012s3.6-7%2010-7c2%200%203.8.7%205.3%201.7M22%2012s-3.6%207-10%207c-2%200-3.8-.7-5.3-1.7%22/%3E%3Cpath%20d=%22M3%203l18%2018%22/%3E%3Cpath%20d=%22M9.9%209.9a3%203%200%200%200%204.2%204.2%22/%3E%3C/svg%3E")}
+.pwwrap{position:relative;display:block}
+.pwwrap input{padding-right:48px}
+.pweye{position:absolute;right:4px;top:4px;width:42px;height:42px;border:none;background:transparent;color:var(--gray);display:flex;align-items:center;justify-content:center;border-radius:10px;padding:0}
+.pweye .i{width:22px;height:22px}
+.pwmask.show{-webkit-text-security:none;text-security:none}

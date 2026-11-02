@@ -309,3 +309,18 @@ function bindMove(others, ids, done){
     }catch(e){ unspinBtn(b); toast("移動に失敗しました。時間をおいて再試行してください",false); }
   };
 }
+
+// ---- PASS入力欄に「目」ボタン（押している間でなく、押すたびに表示／非表示）----
+function enhancePw(root){
+  (root||document).querySelectorAll("input.pwmask:not([data-pw])").forEach(inp=>{
+    inp.dataset.pw="1";
+    const w=document.createElement("span"); w.className="pwwrap";
+    const had=document.activeElement===inp;
+    inp.replaceWith(w); w.appendChild(inp); if(had) inp.focus();
+    const b=document.createElement("button"); b.type="button"; b.className="pweye"; b.setAttribute("aria-label","PASSの表示を切り替える");
+    b.innerHTML='<i class="i i-eye"></i>';
+    b.onclick=()=>{ const on=inp.classList.toggle("show"); b.innerHTML=`<i class="i ${on?"i-eye-off":"i-eye"}"></i>`; inp.focus(); };
+    w.appendChild(b);
+  });
+}
+document.addEventListener("DOMContentLoaded",()=>{ enhancePw(); new MutationObserver(()=>enhancePw()).observe(document.body,{childList:true,subtree:true}); });

@@ -46,10 +46,10 @@ const view=$("#view");
 const sel={g:new Set()};
 let PIN=""; try{ PIN=sessionStorage.getItem("felix_pin")||""; }catch(e){}
 $("#pin").value=PIN;
-const getPin=()=>{ PIN=$("#pin").value; try{ sessionStorage.setItem("felix_pin",PIN); }catch(e){} return PIN; };
+const getPin=()=>{ PIN=$("#pin").value; return PIN; };   // 入力した値は、確認に成功したときだけ端末に記憶する（間違った値で入室情報を壊さないため）
 $("#pincheck").onclick=async()=>{
   const b=$("#pincheck"); spinBtn(b,"確認中…");
-  try{ await callAdmin(getPin(),"ping"); $("#pinmsg").innerHTML=`<div class="info ok">PASSを確認しました</div>`; }
+  try{ await callAdmin(getPin(),"ping"); try{ sessionStorage.setItem("felix_pin",PIN); }catch(e){} $("#pinmsg").innerHTML=`<div class="info ok">PASSを確認しました</div>`; }
   catch(e){ $("#pinmsg").innerHTML=`<div class="err">${esc(e.message)}</div>`; }
   unspinBtn(b);
 };
