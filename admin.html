@@ -287,7 +287,7 @@ async function renderList(fromCache){
       const sorted=[...list].sort((a,b)=>((a.delay_reason||"").trim()?0:1)-((b.delay_reason||"").trim()?0:1) || String(a.inspection_id).localeCompare(String(b.inspection_id)));
       const cur=sorted[0]?.delay_reason||"";
       const idsAttr=list.map(i=>i.inspection_id).join(",");
-      html+=`<div style="display:flex;gap:6px;align-items:stretch;margin-bottom:4px"><button class="type-btn" style="flex:1;margin:0" data-p="${esc(pn)}" data-t="${esc(tn)}">${esc(tn)}</button><button class="btn btn-sub btn-s" data-shp="${esc(pn)}" data-sht="${esc(tn)}" aria-label="この検査を共有"><i class="i i-share"></i></button></div>
+      html+=`<div style="display:flex;gap:6px;align-items:stretch;margin-bottom:4px"><button class="type-btn" style="flex:1;min-width:0;margin:0" data-p="${esc(pn)}" data-t="${esc(tn)}">${esc(tn)}</button><button class="btn btn-sub" style="flex:none;width:52px;padding:0;display:flex;align-items:center;justify-content:center" data-shp="${esc(pn)}" data-sht="${esc(tn)}" aria-label="この検査を共有"><i class="i i-share"></i></button></div>
         <div class="badge">是正写真待ち：${c.wait_fix}件 ／ 管理者確認待ち：${c.wait_conf}件</div>
         <input type="text" class="delay" data-ids="${esc(idsAttr)}" value="${esc(cur)}" placeholder="遅延理由を入力して入力欄の外をタップ">`;
     });

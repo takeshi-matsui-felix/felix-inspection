@@ -1,9 +1,5 @@
 // 検査ごとの共有リンク（グループLINEなどに貼り、業者がその検査へ直接入れる）
 // 依存：画面側の sget / esc / toast / $ （common.js または admin.html のもの）
-// JACK（新築AP現場管理システム）のURL。?fix=FIX番号 を付けると、その物件の詳細と工程表が開く
-const JACK_URL = "https://takeshi-matsui-felix.github.io/jack-kanri/";
-function jackUrl(fixNo){ return JACK_URL + "?fix=" + encodeURIComponent(String(fixNo).trim()); }
-function shIsAdmin(){ try{ const r = JSON.parse(localStorage.getItem("felix_role") || "null"); return !!(r && r.role === "admin"); }catch(e){ return false; } }
 function shareUrl(prop, type, area){
   const q = new URLSearchParams({p: prop, t: type});
   if(area) q.set("a", area);   // 初めて開く端末でも、エリアの選択なしで入れる
@@ -36,11 +32,6 @@ async function openShare(prop, type){
     }
     const insp = [...new Set(mine.map(i => i.inspector).filter(Boolean))].join("・");
     const url = shareUrl(prop, type, pr.area);
-    const fx = String(pr.fix_no || "").trim();
-    // JACKへの入口は管理者だけ。LINEに送る文面・URLには含めない（業者はJACKにログインできないため）
-    const jackHtml = !shIsAdmin() ? "" : fx
-      ? `<div class="row"><button class="btn btn-sub" id="sh_jack"><i class="i i-external"></i> JACKで開く（FiX No.${esc(fx)}）</button><div style="font-size:12px;opacity:.7;margin-top:4px">※自分用のボタンです。LINEに送る文面には入りません。</div></div>`
-      : `<div class="info warn row" style="font-size:12px">この物件はFiX Noが未設定のため、JACKに連携できません（「物件登録」で設定できます）。</div>`;
     const lines = [`【是正依頼】${prop}／${type}`, `是正待ち：${wait}件`];
     if(pr.handover_date) lines.push(`引渡し日：${pr.handover_date}`);
     if(insp) lines.push(`検査員：${insp}`);
@@ -51,9 +42,7 @@ async function openShare(prop, type){
       ${wait ? "" : `<div class="info warn">いま「是正待ち」の指摘は0件です。承認前の指摘は、業者の画面に出ません。</div>`}
       <button class="btn btn-primary" id="sh_share"><i class="i i-share"></i> LINEなどで共有する</button>
       <div class="btns row"><button class="btn btn-sub" id="sh_url"><i class="i i-link"></i> URLだけコピー</button><button class="btn btn-sub" id="sh_txt"><i class="i i-copy"></i> 文面をコピー</button></div>
-      ${jackHtml}
       <button class="btn btn-sub row" id="sh_close">閉じる</button></div>`;
-    document.getElementById("sh_jack")?.addEventListener("click", () => { window.open(jackUrl(fx), "_blank", "noopener"); });
     document.getElementById("sh_close").onclick = () => ov.remove();
     document.getElementById("sh_url").onclick = async () => toast(await shareCopy(url) ? "URLをコピーしました" : "コピーできませんでした", true);
     document.getElementById("sh_txt").onclick = async () => toast(await shareCopy(text) ? "文面をコピーしました" : "コピーできませんでした", true);
