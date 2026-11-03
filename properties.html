@@ -30,6 +30,92 @@ let areaSel = "すべて表示";
 let editTarget = null, delTarget = null;
 let DATA = null;
 
+// ---- JACKとFiX Noの紐付け ----
+let linkOpen=false, linkText="", linkRows=null, jackList=[];
+function cleanFix(v){ return String(v||"").normalize("NFKC").replace(/\s+/g,"").replace(/^no\.?/i,""); }
+// 物件名のゆれをそろえる（JACKの「Jack」、全角数字、ローマ数字Ⅰ/Ⅱ/I/II→1/2、空白）
+function normName(s){
+  let t=String(s||"").normalize("NFKC").replace(/\s+/g,"");
+  t=t.replace(/^[A-Za-z]+(?=[^A-Za-z0-9])/,"");
+  const R={I:1,II:2,III:3,IV:4,V:5,VI:6,VII:7,VIII:8,IX:9,X:10};
+  t=t.replace(/(?<![A-Za-z])(VIII|VII|III|II|IX|IV|VI|X|V|I)$/,m=>R[m]);
+  return t;
+}
+function parseJack(text){
+  const out=[];
+  String(text||"").split(/\r?\n/).forEach(line=>{
+    const m=line.match(/^\s*(\d+)\s*[\t,，]\s*(.+?)\s*$/)||line.match(/^\s*(\d+)\s+(.+?)\s*$/);
+    if(m) out.push({fx:m[1],name:m[2],norm:normName(m[2])});
+  });
+  return out;
+}
+function matchRows(props,list){
+  return props.filter(p=>p.property_id).map(p=>{
+    const n=normName(p.property_name), cur=String(p.fix_no||"");
+    let cand=list.filter(j=>j.norm===n), kind="exact";
+    if(cand.length===0){
+      const part=(n.length>=4)?list.filter(j=>j.norm.length>=4&&(j.norm.endsWith(n)||n.endsWith(j.norm))):[];
+      if(part.length===1){ cand=part; kind="fuzzy"; } else if(part.length>1){ cand=part; kind="multi"; } else kind="none";
+    }else if(cand.length>1) kind="multi";
+    const auto=(kind==="exact"||kind==="fuzzy")?cand[0].fx:"";
+    return {id:p.property_id,name:p.property_name,cur,val:cur||auto,kind:cur?"set":kind,cands:kind==="multi"?cand:[]};
+  });
+}
+function linkPanelHtml(props){
+  const un=props.filter(p=>p.property_id&&!p.fix_no).length;
+  let h=`<details class="sub" id="lnk" ${linkOpen?"open":""}><summary><i class="i i-link"></i> JACKとFiX Noを紐付ける（まとめて）${un?`　<span style="color:var(--red)">未設定 ${un}件</span>`:"　設定済み"}</summary>
+    <div class="info">① JACKの管理者CP「検査App連携」で「コピー」を押す　② 下の枠に貼り付ける　③「照合する」で候補が出ます。確認して「保存」を押してください（最初の1回だけの作業です）。</div>
+    <textarea id="lnk_txt" rows="4" placeholder="657&#9;Jack安城市住吉町 I">${esc(linkText)}</textarea>
+    <button class="btn btn-sub" id="lnk_go">照合する</button><div id="lnk_res">${linkRowsHtml()}</div></details>`;
+  return h;
+}
+const LK={set:["設定済み","background:#e2e6ec;color:#445"],exact:["自動一致","conf"],fuzzy:["要確認（似ている名前）","wait"],multi:["候補が複数・要選択","wait"],none:["候補なし・直接入力","wait"]};
+function linkRowsHtml(){
+  if(!linkRows) return "";
+  const map={}; jackList.forEach(j=>map[j.fx]=j.name);
+  const rows=linkRows.map((r,i)=>{
+    const k=LK[r.kind]||LK.none, cls=k[1].includes(":")?`" style="${k[1]}`:` ${k[1]}`;
+    return `<div style="border-top:1px solid var(--line);padding:10px 0">
+      <div style="font-weight:700;font-size:14px">${esc(r.name)} <span class="st${cls}">${k[0]}</span></div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:4px"><input type="text" inputmode="numeric" class="lfx" data-i="${i}" value="${esc(r.val)}" placeholder="FiX No" style="width:110px;margin:0">
+      <div class="lm" data-i="${i}" style="font-size:12px;flex:1">${lmText(r.val,map)}</div></div>
+      ${r.cands.length?`<div style="font-size:12px;margin-top:4px;opacity:.85">候補：${r.cands.map(c=>`No.${esc(c.fx)} ${esc(c.name)}`).join(" ／ ")}</div>`:""}</div>`;
+  }).join("");
+  const n=(k)=>linkRows.filter(r=>r.kind===k).length;
+  return `<div class="info ok">JACK ${jackList.length}件と照合：自動一致 ${n("exact")}件／要確認 ${n("fuzzy")+n("multi")}件／候補なし ${n("none")}件／設定済み ${n("set")}件</div>${rows}<button class="btn btn-primary" id="lnk_save" style="margin-top:10px">変更を保存する</button>`;
+}
+function lmText(val,map){ return val?(map[val]?`→ JACK：${esc(map[val])}`:`<span style="color:var(--red)">→ このNoはJACKの一覧にありません</span>`):`→ 未設定`; }
+function bindLinkPanel(){
+  const d=$("#lnk"); if(!d) return;
+  d.addEventListener("toggle",()=>{ linkOpen=d.open; });
+  const ta=$("#lnk_txt"); ta.oninput=()=>{ linkText=ta.value; };
+  $("#lnk_go").onclick=()=>{
+    const list=parseJack(ta.value);
+    if(!list.length){ toast("貼り付けた内容を読み取れませんでした（FiX Noと物件名が並んだ行が必要です）",false); return; }
+    linkText=ta.value; jackList=list; linkRows=matchRows(DATA.props,list); linkOpen=true; draw();
+  };
+  const map={}; jackList.forEach(j=>map[j.fx]=j.name);
+  view.querySelectorAll(".lfx").forEach(inp=>inp.oninput=()=>{
+    const r=linkRows[inp.dataset.i]; r.val=cleanFix(inp.value);
+    inp.closest("div").querySelector(".lm").innerHTML=lmText(r.val,map);
+  });
+  $("#lnk_save")?.addEventListener("click",saveLinks);
+}
+async function saveLinks(){
+  const ch=linkRows.filter(r=>r.val!==r.cur);
+  if(!ch.length){ toast("変更はありません"); return; }
+  const bad=ch.find(r=>r.val&&!/^\d+$/.test(r.val));
+  if(bad){ toast(`「${bad.name}」のFiX Noは数字で入力してください`,false); return; }
+  const seen={};
+  for(const r of linkRows){ if(!r.val) continue; if(seen[r.val]){ toast(`FiX No.${r.val} が重複しています（${seen[r.val]} と ${r.name}）`,false); return; } seen[r.val]=r.name; }
+  if(!confirm(`${ch.length}件の物件のFiX Noを保存します。よろしいですか？`)) return;
+  const b=$("#lnk_save"); spinBtn(b,"保存中…"); let ok=0,ng=0,last="";
+  for(const r of ch){ try{ await spatch("properties","property_id",r.id,{fix_no:r.val||null}); ok++; }catch(e){ ng++; last=e.message; } }
+  if(ng) toast(`${ok}件を保存、${ng}件は失敗しました。`+(/400/.test(last)?"（FiX Noの保存先の列が未作成の可能性があります。SQLを先に実行してください）":"もう一度お試しください"),false);
+  else toast(`${ok}件のFiX Noを保存しました`);
+  DATA=null; linkRows=null; render();
+}
+
 async function load(){
   const [props, ins, recs] = await Promise.all([
     sget("properties","select=*&is_deleted=eq.false"),
@@ -60,9 +146,11 @@ function draw(){
   let h=`<div class="card"><div class="inner" style="padding-top:14px">
     <div class="lab">エリアを選択</div>${chips("new_area",["東海エリア","関東エリア"],"東海エリア")}
     <div class="lab">新規物件名</div><input type="text" id="new_name" placeholder="物件名を入力">
+    <div class="lab">FiX No（JACKと連動・わかる場合のみ）</div><input type="text" id="new_fix" inputmode="numeric" placeholder="例：657">
     <label style="display:block;margin:6px 0"><input type="checkbox" id="new_hchk"> 引渡し日を設定する</label>
     <input type="date" id="new_hdate" value="${todayISO()}" style="display:none">
     <button class="btn btn-primary" id="addbtn">登録</button></div></div>
+    ${linkPanelHtml(props)}
     <h3 style="margin:22px 0 8px;color:var(--navy)">登録済み物件一覧</h3>
     <div class="seg">${["すべて表示","東海エリア","関東エリア"].map(a=>`<button data-area="${a}" class="${a===areaSel?"on":""}">${a}</button>`).join("")}</div>`;
   props.forEach(p=>{
@@ -71,7 +159,7 @@ function draw(){
     if(areaSel!=="すべて表示" && pa!==areaSel) return;
     const hd=p.handover_date?`引渡${p.handover_date}`:"引渡未定";
     const ic=insCount[id]||0, cnt=ic>0?`${ic}件`:"データなし";
-    h+=`<div class="prow"><button class="pname ${pa==="関東エリア"?"kanto":""}" data-start="${esc(id)}">${esc(p.property_name)}｜${hd}｜${cnt}</button>
+    h+=`<div class="prow"><button class="pname ${pa==="関東エリア"?"kanto":""}" data-start="${esc(id)}">${p.fix_no?`No.${esc(p.fix_no)}　`:""}${esc(p.property_name)}｜${hd}｜${cnt}</button>
       <button class="btn btn-sub btn-s" data-edit="${esc(id)}">変更</button><button class="btn btn-sub btn-s" data-del="${esc(id)}">削除</button></div>`;
     const c=counts[id];
     if(c&&c.total>0){ const pct=Math.floor(c.done/c.total*100); h+=`<div class="bar"><i><b style="width:${pct}%;background:${pct===100?"#2E9E64":"#E8A33D"}"></b></i><span>完了 ${c.done}/${c.total}</span></div>`; }
@@ -79,6 +167,7 @@ function draw(){
       const has=!!(p.handover_date&&p.handover_date.trim());
       h+=`<div class="info warn">「${esc(p.property_name)}」の内容を変更します。過去のデータ名も連動して更新されます。</div>
         <div class="lab">物件名</div><input type="text" id="e_name" value="${esc(p.property_name)}">
+        <div class="lab">FiX No（JACKと連動）</div><input type="text" id="e_fix" inputmode="numeric" value="${esc(p.fix_no||"")}" placeholder="未設定">
         <label style="display:block;margin:6px 0"><input type="checkbox" id="e_hchk" ${has?"checked":""}> 引渡し日を設定する</label>
         <input type="date" id="e_hdate" value="${esc(has?p.handover_date:todayISO())}" style="${has?"":"display:none"}">
         <div class="btns"><button class="btn btn-primary" id="e_save">保存</button><button class="btn btn-sub" id="e_cancel">キャンセル</button></div><hr>`;
@@ -88,14 +177,18 @@ function draw(){
     }
   });
   view.innerHTML=h;
+  bindLinkPanel();
 
   $("#new_hchk").onchange=e=>{ $("#new_hdate").style.display=e.target.checked?"":"none"; };
   $("#addbtn").onclick=async()=>{
     const name=$("#new_name").value.trim(); if(!name){ toast("物件名を入力してください",false); return; }
     const area=chipVal(document,"new_area");
     const hd=$("#new_hchk").checked?$("#new_hdate").value:null;
+    const fx=cleanFix($("#new_fix").value);
+    if(fx&&!/^\d+$/.test(fx)){ toast("FiX Noは数字で入力してください",false); return; }
+    if(fx&&props.some(x=>String(x.fix_no||"")===fx)){ toast(`FiX No.${fx} は、すでに別の物件に設定されています`,false); return; }
     spinBtn($("#addbtn"),"登録中…");
-    try{ await spost("properties",{property_id:uuid(),property_name:name,area,handover_date:hd}); toast(`[${area}] に登録しました`); DATA=null; render(); }
+    try{ const nb={property_id:uuid(),property_name:name,area,handover_date:hd}; if(fx) nb.fix_no=fx; await spost("properties",nb); toast(`[${area}] に登録しました`); DATA=null; render(); }
     catch(e){ unspinBtn($("#addbtn")); toast("登録に失敗しました。もう一度押してください",false); }
   };
   view.querySelectorAll("[data-area]").forEach(b=>b.onclick=()=>{areaSel=b.dataset.area; draw();});
@@ -109,9 +202,15 @@ function draw(){
       const p=props.find(x=>x.property_id===editTarget); const nn=$("#e_name").value.trim();
       if(!nn){ toast("物件名を入力してください",false); return; }
       const nh=$("#e_hchk").checked?$("#e_hdate").value:null;
+      const nf=cleanFix($("#e_fix").value), body={property_name:nn,handover_date:nh};
+      if(nf!==String(p.fix_no||"")){   // FiX Noは変えたときだけ送る
+        if(nf&&!/^\d+$/.test(nf)){ toast("FiX Noは数字で入力してください",false); return; }
+        if(nf&&props.some(x=>x.property_id!==editTarget&&String(x.fix_no||"")===nf)){ toast(`FiX No.${nf} は、すでに別の物件に設定されています`,false); return; }
+        body.fix_no=nf||null;
+      }
       spinBtn($("#e_save"),"保存中…");
       try{
-        await spatch("properties","property_id",editTarget,{property_name:nn,handover_date:nh});
+        await spatch("properties","property_id",editTarget,body);
         if(nn!==p.property_name) await spatch("inspections","property_id",editTarget,{property_name:nn});
         toast("変更を保存しました"); editTarget=null; DATA=null; render();
       }catch(e){ unspinBtn($("#e_save")); toast("変更の保存に失敗しました。もう一度押してください",false); }
