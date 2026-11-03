@@ -62,7 +62,7 @@ function render(){
 async function renderStart(){
   $("#ttl").textContent="検査開始";
   view.innerHTML=`<div class="info">読み込み中…</div>`;
-  try{ if(!PROPS) PROPS=sortProps(await sget("properties","select=*&is_deleted=eq.false")); }
+  try{ if(!PROPS) PROPS=sortProps(await sget("properties","select=*&is_deleted=eq.false")); fxReg(PROPS); }
   catch(e){ showError(view,"通信に失敗しました。電波の良い場所でもう一度お試しください。（"+e.message+"）",()=>renderStart()); return; }
   const hashProp=decodeURIComponent((location.hash.match(/prop=([^&]+)/)||[])[1]||"");
   const pre=PROPS.find(p=>p.property_id===hashProp) || (SES&&PROPS.find(p=>p.property_id===SES.prop_id)) || PROPS[0];
@@ -74,7 +74,7 @@ async function renderStart(){
       <div class="btns row"><button class="btn btn-primary" id="resume">続きから再開</button><button class="btn btn-danger" id="discard">破棄する</button></div></div>`;
   }
   h+=`<div class="lab">エリアを選択</div>${chips("s_area",["東海エリア","関東エリア"],area)}
-    <div class="lab">物件名で検索（一部入力でも可）</div><input type="text" id="s_q" placeholder="物件名の一部">
+    <div class="lab">物件名またはFiX Noで検索</div><input type="text" id="s_q" placeholder="物件名の一部 / FiX No">
     <div class="lab">物件を選択 <span style="font-weight:400;color:var(--gray)">（引渡し日が近い順）</span></div><select id="s_prop"></select>
     <div class="lab">検査種類を選択</div><select id="s_type"><option value="">-- 選択 --</option>${INSP_OPTS.map(o=>`<option>${esc(o)}</option>`).join("")}</select>
     <div class="btns"><div><div class="lab">検査日時</div><input type="date" id="s_date" value="${todayISO()}"></div>
@@ -83,8 +83,8 @@ async function renderStart(){
   view.innerHTML=h;
   const fillProps=()=>{
     area=chipVal(view,"s_area"); q=$("#s_q").value.trim();
-    const list=PROPS.filter(p=>p.area===area&&(!q||p.property_name.includes(q)));
-    $("#s_prop").innerHTML=`<option value="">-- 選択 --</option>`+list.map(p=>`<option value="${esc(p.property_id)}" ${p.property_id===propId?"selected":""}>${esc(p.property_name)}${p.handover_date?` (引渡し: ${esc(p.handover_date)})`:" (引渡し未設定)"}</option>`).join("");
+    const list=PROPS.filter(p=>p.area===area&&(!q||fxHit(p.property_name,q)));
+    $("#s_prop").innerHTML=`<option value="">-- 選択 --</option>`+list.map(p=>`<option value="${esc(p.property_id)}" ${p.property_id===propId?"selected":""}>${p.fix_no?"No."+esc(p.fix_no)+" ":""}${esc(p.property_name)}${p.handover_date?` (引渡し: ${esc(p.handover_date)})`:" (引渡し未設定)"}</option>`).join("");
   };
   fillProps();
   $$('input[name="s_area"]').forEach(r=>r.onchange=()=>{propId="";fillProps();});

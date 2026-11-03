@@ -324,3 +324,9 @@ function enhancePw(root){
   });
 }
 document.addEventListener("DOMContentLoaded",()=>{ enhancePw(); new MutationObserver(()=>enhancePw()).observe(document.body,{childList:true,subtree:true}); });
+
+// ---- FiX No（JACKとの連携番号）の表示・検索 ----
+const FXN = {};
+function fxReg(props){ (props||[]).forEach(x=>{ if(x && x.property_name && x.fix_no) FXN[x.property_name]=String(x.fix_no); }); }
+function fxTag(pn){ return FXN[pn] ? `<span class="fxn">No.${esc(FXN[pn])}</span>` : ""; }
+function fxHit(pn,q){ if(!q) return true; q=String(q).trim(); const n=q.replace(/^no\.?\s*/i,""); return String(pn).includes(q) || (n!=="" && String(FXN[pn]||"").includes(n)); }

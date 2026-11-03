@@ -102,7 +102,7 @@ async function render(){
   groups.forEach(g=>{
     const kind=g.prop?`物件ごと削除（検査${g.ins.length}件を含む）`:`検査のみ削除（${g.ins.length}件）`;
     h+=`<div class="trow"><div class="hd"><input type="checkbox" data-g="${esc(g.key)}" ${sel.g.has(g.key)?"checked":""}>
-      <div><div class="nm">${g.area?`[${esc(g.area)}] `:""}${esc(g.name)}</div><div class="ph"><i class="i i-camera"></i> 写真${g.photos}枚 ／ ${kind}</div></div></div>
+      <div><div class="nm">${g.area?`[${esc(g.area)}] `:""}${g.prop&&g.prop.fix_no?`<span class="fxn">No.${esc(g.prop.fix_no)}</span>`:""}${esc(g.name)}</div><div class="ph"><i class="i i-camera"></i> 写真${g.photos}枚 ／ ${kind}</div></div></div>
       <div class="btns row"><button class="btn btn-sub" data-rg="${esc(g.key)}"><i class="i i-undo"></i> まとめて復元</button><button class="btn btn-danger" data-pg="${esc(g.key)}"><i class="i i-trash"></i> まとめて完全に削除</button></div>`;
     if(g.ins.length) h+=`<details style="margin-top:8px"><summary style="font-size:13px;color:var(--gray)">検査の内訳（${g.ins.length}件・1件ずつ処理したいとき）</summary>${g.ins.map(i=>`<div style="border-top:1px solid var(--line);padding:8px 0;margin-top:6px"><div style="font-size:14px;font-weight:700">${esc(i.inspection_type||"不明")} <span style="font-weight:400;color:var(--gray);font-size:12px">${esc(String(i.inspection_date||i.created_at||"").slice(0,10))}　<i class="i i-camera"></i>${D.insCnt[i.inspection_id]||0}枚</span></div>
       <div class="btns row"><button class="btn btn-sub" data-ri="${esc(i.inspection_id)}"><i class="i i-undo"></i> 復元</button><button class="btn btn-danger" data-pi="${esc(i.inspection_id)}"><i class="i i-trash"></i> 完全に削除</button></div></div>`).join("")}</details>`;

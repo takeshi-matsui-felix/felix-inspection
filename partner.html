@@ -177,11 +177,13 @@ let ROLE = null; try{ ROLE = JSON.parse(lsGet("felix_role")||"null"); }catch(e){
 {
   const hq = new URLSearchParams(location.hash.replace(/^#/, ""));
   if(!ROLE && ["東海エリア","関東エリア"].includes(hq.get("a"))){ ROLE = {role:"partner", area:hq.get("a")}; lsSet("felix_role", JSON.stringify(ROLE)); }
-  if(ROLE && ROLE.role==="admin" && hq.get("p") && hq.get("t")){ location.replace("admin.html#" + hq.toString()); }   // 管理者は是正ダッシュボードの同じ検査へ
+  if(ROLE && ROLE.role==="admin" && ((hq.get("p") && hq.get("t")) || hq.get("fix"))){ location.replace("admin.html#" + hq.toString()); }   // 管理者は是正ダッシュボードの同じ検査へ
 }
 if(ROLE&&ROLE.role==="partner") document.documentElement.classList.add("big");   // 協力業者は全体を大きく表示
 if(!ROLE){ try{ sessionStorage.setItem("felix_next","partner.html"+location.hash); }catch(e){} location.replace("index.html"); }
 let AREA = (ROLE && ROLE.role==="partner") ? ROLE.area : lsGet(AREA_KEY);
+let FIXQ = new URLSearchParams(location.hash.replace(/^#/, "")).get("fix") || "", OPEN_ONE = "", FIXMSG = "";
+const AREAHINT = r => (AREA && r.area && r.area !== AREA) ? `この物件は ${r.area} です。いまの表示エリアと違うため、ホームでエリアを選び直してください。` : "";
 let pending = {};   // record_id -> {full, thumb, url}（送信前の写真を画面内に保持）
 
 $("#changeArea").onclick = () => { location.href = "index.html?m=1"; };
@@ -198,6 +200,7 @@ function showError(msg, retry){
 
 async function render(){
   $("#ttl").textContent = "是正実施";
+  if(FIXQ && AREA) await resolveFix();
   if(!AREA){
     $("#changeArea").style.display = "none";
     view.innerHTML = `<h2 style="text-align:center;color:var(--navy)">エリアを選択</h2>
@@ -214,6 +217,18 @@ async function render(){
   }catch(e){
     showError("通信に失敗しました。電波の良い場所でもう一度お試しください。（" + e.message + "）", render);
   }
+}
+
+
+// ---- JACKから来たとき（#fix=FiX No）：その物件を検索して、カードを開いた状態で一覧を出す ----
+async function resolveFix(){
+  const fx=FIXQ; FIXQ="";
+  try{
+    const r=await sget("properties",`select=property_name,area&fix_no=eq.${encodeURIComponent(fx)}&is_deleted=eq.false`);
+    if(r.length){ q_search=r[0].property_name; OPEN_ONE=r[0].property_name; FIXMSG=AREAHINT(r[0]); }
+    else FIXMSG=`FiX No.${fx} の物件は、検査Appに登録されていません。`;
+  }catch(e){ FIXMSG="物件の検索に失敗しました。もう一度開いてください。"; }
+  try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){}   // 再読み込みで同じ検索を繰り返さない
 }
 
 async function loadTree(){
@@ -249,7 +264,7 @@ let q_search = "";
 async function renderList(){
   lsDel("felix_partner_session");
   const {tree, order, hdate} = await loadTree();
-  let html = `<div class="info ok">現在の表示エリア：【 ${esc(AREA)} 】</div>
+  let html = `<div class="info ok">現在の表示エリア：【 ${esc(AREA)} 】</div>${FIXMSG?`<div class="info" style="background:#fff3cd;color:#6b5400">${esc(FIXMSG)}</div>`:""}
     <input type="text" id="q" name="felix-search" autocomplete="off" data-lpignore="true" data-1p-ignore placeholder="物件名で検索（一部入力でも可）" value="${esc(q_search)}">`;
   let any = false;
   order.forEach(pn => {
@@ -259,7 +274,7 @@ async function renderList(){
     if(!types.length) return;
     any = true;
     const h = hdate[node.prop_id] ? ` (引渡し: ${esc(hdate[node.prop_id])})` : " (引渡し未設定)";
-    html += `<details class="card"><summary>${esc(pn)}${h}</summary><div class="inner">`;
+    html += `<details class="card"${pn===OPEN_ONE?" open":""}><summary>${esc(pn)}${h}</summary><div class="inner">`;
     types.forEach(tn => {
       const c = node.types[tn];
       html += `<button class="type-btn" data-p="${esc(pn)}" data-t="${esc(tn)}">${esc(tn)}</button>
