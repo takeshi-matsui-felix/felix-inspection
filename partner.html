@@ -53,6 +53,7 @@
   input[type=text]{width:100%;padding:11px;border-radius:8px;border:1px solid var(--line);font-size:15px;margin-bottom:12px}
   #lb{display:none;position:fixed;inset:0;background:#0a0f19ee;z-index:100;align-items:center;justify-content:center;padding:16px}
   #lb img{max-width:96vw;max-height:94vh;border-radius:8px}
+  .mtag{display:inline-block;font-size:11px;font-weight:800;padding:2px 8px;border-radius:10px;background:#16324F;color:#fff;margin-right:4px;vertical-align:1px}
   .w{font-size:13px;font-weight:700;color:var(--blue);margin:14px 0 8px}
   .sp{display:inline-block;width:14px;height:14px;border:2px solid #fff7;border-top-color:#fff;border-radius:50%;animation:s 0.8s linear infinite;vertical-align:-2px;margin-right:6px}
   @keyframes s{to{transform:rotate(360deg)}}
@@ -79,6 +80,8 @@ const SB_KEY = "sb_publishable_2y-rvfayu8BYs0oo-UOzGA_EQTBYLxm";
 const H = {apikey: SB_KEY, Authorization: "Bearer " + SB_KEY};
 const SHANAI = ["社内検査(設計)", "社内検査(建設)", "社内検査(マーケ)", "社内検査(不動産)"];
 const AREA_KEY = "felix_partner_area";
+const MERGE_T = "社内検査まとめ";   // 同じ物件の社内検査（設計・建設・マーケ・不動産）を1画面にまとめる擬似的な検査名
+const shortT = t => (String(t).match(/\(([^)]+)\)/)||[])[1] || t;
 
 const $ = s => document.querySelector(s);
 const view = $("#view");
@@ -275,6 +278,12 @@ async function renderList(){
     any = true;
     const h = hdate[node.prop_id] ? ` (引渡し: ${esc(hdate[node.prop_id])})` : " (引渡し未設定)";
     html += `<details class="card"${pn===OPEN_ONE?" open":""}><summary>${esc(pn)}${h}</summary><div class="inner">`;
+    const shTypes = types.filter(t => SHANAI.includes(t));
+    if(shTypes.length >= 2){
+      const n = shTypes.reduce((a,t)=>a+node.types[t].wait_fix,0);
+      html += `<button class="type-btn" style="background:var(--navy);color:#fff;border-color:var(--navy)" data-p="${esc(pn)}" data-t="${esc(MERGE_T)}">社内検査をまとめて是正（${shTypes.length}検査・${n}件）</button>
+        <div class="badge">${shTypes.map(esc).map(x=>shortT(x)).join("・")} の指摘を、部屋ごとに1画面で是正できます</div>`;
+    }
     types.forEach(tn => {
       const c = node.types[tn];
       html += `<button class="type-btn" data-p="${esc(pn)}" data-t="${esc(tn)}">${esc(tn)}</button>
@@ -292,13 +301,17 @@ async function renderList(){
 async function renderDetail(pn, tn){
   $("#ttl").textContent = pn;
   const {tree, ins} = await loadTree();
-  if(!tree[pn] || !tree[pn].types[tn]){
+  const MERGE = (tn === MERGE_T);
+  if(!tree[pn] || (MERGE ? !Object.keys(tree[pn].types).some(t => SHANAI.includes(t)) : !tree[pn].types[tn])){
     go();   // このエリアに無い物件・検査なら一覧へ
     return;
   }
   lsSet("felix_partner_session", JSON.stringify({prop: pn, type: tn, ts: Date.now()}));   // 12時間以内なら、ホームから自動で戻れる
-  const ids = ins.filter(i => i.property_name === pn && i.inspection_type === tn).map(i => i.inspection_id);
+  const mine = ins.filter(i => i.property_name === pn && (MERGE ? SHANAI.includes(i.inspection_type) : i.inspection_type === tn));
+  const typeOf = {}; mine.forEach(i => typeOf[i.inspection_id] = i.inspection_type);
+  const ids = mine.map(i => i.inspection_id);
   const recsAll = ids.length ? await sget("inspection_records", `inspection_id=in.(${ids.join(",")})`) : [];
+  recsAll.forEach(r => { r._t = typeOf[r.inspection_id] || tn; if(MERGE) r._tag = shortT(r._t); });
   let recs = recsAll.filter(r => r.progress_status === "是正待ち");
   const total = recsAll.length, wait = recs.length;
 
@@ -306,9 +319,13 @@ async function renderDetail(pn, tn){
     <div class="info">進捗： 指摘総数 ${total}件 ／ 残り（是正報告待ち） ${wait}件</div>`;
   if(total > 0 && wait === 0){ html += `<div class="info ok">この検査の是正はすべて報告済みです。「⬅ 戻る」で一覧に戻れます。</div>`; lsDel("felix_partner_session"); }
 
-  if(recs.length && SHANAI.includes(tn)){
+  if(recs.length && (MERGE || SHANAI.includes(tn))){
     const fl = [...new Set(recs.map(r=>r.floor_level).filter(Boolean))].sort();
     html += `部屋（階層）で絞り込み<select id="ffloor"><option>すべて表示</option>${fl.map(f=>`<option>${esc(f)}</option>`).join("")}</select>`;
+  }
+  if(MERGE && recs.length){
+    const ts = [...new Set(recs.map(r=>r._tag))].sort();
+    html += `検査（設計・建設など）で絞り込み<select id="ftag"><option>すべて表示</option>${ts.map(f=>`<option>${esc(f)}</option>`).join("")}</select>`;
   }
   if(recs.length){
     const ws = [...new Set(recs.map(r=>r.work_type||"その他"))].sort();
@@ -319,21 +336,32 @@ async function renderDetail(pn, tn){
   $("#back").onclick = () => go();
 
   const draw = () => {
-    const ff = $("#ffloor")?.value, fw = $("#fwork")?.value;
+    const ff = $("#ffloor")?.value, fw = $("#fwork")?.value, ft = $("#ftag")?.value;
     let list = recs;
     if(ff && ff !== "すべて表示") list = list.filter(r => r.floor_level === ff);
     if(fw && fw !== "すべて表示") list = list.filter(r => (r.work_type||"その他") === fw);
-    const groups = {}; list.forEach(r => (groups[r.work_type||"その他"] ??= []).push(r));
+    if(ft && ft !== "すべて表示") list = list.filter(r => r._tag === ft);
     let h = "";
-    Object.entries(groups).forEach(([w, rs]) => {
-      h += `<div class="w">■ 工種: ${esc(w)}</div>`;
-      rs.forEach(r => h += recHtml(r, tn));
-    });
+    if(MERGE){
+      // 部屋ごと → 検査（設計・建設…）の順 → 工種の順に並べる
+      const groups = {}; list.forEach(r => (groups[r.floor_level||"その他"] ??= []).push(r));
+      Object.keys(groups).sort((a,b)=>String(a).localeCompare(String(b),"ja",{numeric:true})).forEach(f => {
+        h += `<div class="w">■ 部屋: ${esc(f)}（${groups[f].length}件）</div>`;
+        groups[f].sort((a,b)=>String(a._t).localeCompare(String(b._t),"ja")||String(a.work_type||"").localeCompare(String(b.work_type||""),"ja")).forEach(r => h += recHtml(r, r._t));
+      });
+    }else{
+      const groups = {}; list.forEach(r => (groups[r.work_type||"その他"] ??= []).push(r));
+      Object.entries(groups).forEach(([w, rs]) => {
+        h += `<div class="w">■ 工種: ${esc(w)}</div>`;
+        rs.forEach(r => h += recHtml(r, tn));
+      });
+    }
     $("#recs").innerHTML = h;
     bindRecs(list, pn, tn, recs, draw);
   };
   $("#ffloor")?.addEventListener("change", draw);
   $("#fwork")?.addEventListener("change", draw);
+  $("#ftag")?.addEventListener("change", draw);
   draw();
 }
 
@@ -346,7 +374,7 @@ function recHtml(r, tn){
     : `<div class="nophoto">写真なし</div>`;
   const pv = pending[r.record_id];
   return `<div class="rec" data-id="${esc(r.record_id)}">
-    <h3>${esc(title)}</h3>
+    <h3>${r._tag?`<span class="mtag">${esc(r._tag)}</span>`:""}${esc(title)}</h3>
     ${r.reject_reason ? `<div class="reject">否認理由: ${esc(r.reject_reason)}</div>` : ""}
     <div class="cols">
       <div><h4>【指摘箇所（Before）】</h4>${before}</div>
@@ -372,7 +400,7 @@ function bindRecs(list, pn, tn, allRecs, redraw){
       const rec = allRecs.find(x => String(x.record_id) === id) || {};
       const detail = rec.issue_detail || "";
       const board = {
-        propName: pn, inspType: tn, inspDate: todayStr(),
+        propName: pn, inspType: (rec._t || tn), inspDate: todayStr(),
         locationText: `${rec.floor_level||""} ${rec.area||""} ${rec.work_type||""}`.trim(),
         issueDetail: detail.length > 80 ? detail.slice(0, 80) + "..." : detail
       };
