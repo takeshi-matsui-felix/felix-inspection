@@ -131,7 +131,8 @@ async function renderDetail(pn,tn){
         rh+=`<div class="rec" data-id="${esc(r.record_id)}"><h3>${esc(title)}</h3>
           ${r.issue_photo_url?`<img loading="lazy" decoding="async" class="pic" src="${esc(r.issue_photo_thumb_url||r.issue_photo_url)}" data-full="${esc(r.issue_photo_url)}" alt="">`:`<div class="nophoto">写真なし</div>`}
           ${editorHtml(r,tn)}
-          <div class="row"><button class="btn btn-primary" data-ok="${esc(r.record_id)}">個別承認（業者へ送る）</button></div></div>`;
+          <div class="row"><button class="btn btn-primary" data-ok="${esc(r.record_id)}">個別承認（業者へ送る）</button></div>
+          <div class="row"><button class="btn btn-danger" data-del="${esc(r.record_id)}">この内容を削除（業者へ送らない）</button></div></div>`;
       });
     });
     if(!list.length) rh=`<div class="info">該当する確認待ちの指摘はありません。</div>`;
@@ -140,6 +141,15 @@ async function renderDetail(pn,tn){
       spinBtn(btn,"処理中…");
       try{ await spatch("inspection_records","record_id",btn.dataset.ok,{progress_status:"是正待ち"}); LC=null; toast("承認しました（業者へ送りました）"); render(); }
       catch(e){ unspinBtn(btn); toast("承認に失敗しました。もう一度押してください",false); }
+    });
+    // 「この内容を削除」：業者へ送らない指摘を消す。写真は迷子写真に移る（管理用Edge Function経由・確認ダイアログのみ）
+    $$("[data-del]").forEach(btn=>btn.onclick=async()=>{
+      if(!confirm("この指摘を削除します。業者へは送られません。\n（写真は「迷子写真」に移ります）\n\nよろしいですか？")) return;
+      let pin=""; try{ pin=sessionStorage.getItem("felix_pin")||""; }catch(e){}
+      if(!pin){ toast("いったんログアウトして、PASSを入れ直してください",false); return; }
+      spinBtn(btn,"削除中…");
+      try{ const x=await callAdmin(pin,"delete_record",{id:btn.dataset.del}); LC=null; toast(x.deleted?"削除しました":(x.note||"すでに削除されています")); render(); }
+      catch(e){ unspinBtn(btn); toast("削除に失敗しました："+e.message,false); }
     });
     bindEditor($("#recs"),recs,tn,pn,()=>{LC=null;render();});
   };
