@@ -128,6 +128,16 @@ async function spatch(table, col, val, body){
     method:"PATCH", headers:{...H,"Content-Type":"application/json","Prefer":"return=minimal"}, body: JSON.stringify(body)});
   if(!r.ok) throw new Error(`更新失敗 (${r.status})`);
 }
+// 削除は管理用Edge Function(felix-record)経由。ログイン時のPASSを使うので、削除のたびの入力は不要
+async function callRec(action, payload){
+  let pin=""; try{ pin=sessionStorage.getItem("felix_pin")||""; }catch(e){}
+  if(!pin) throw new Error("いったんログアウトして、PASSを入れ直してください");
+  let r; try{ r=await fetch(SB_URL+"/functions/v1/felix-record",{method:"POST",headers:{...H,"Content-Type":"application/json"},body:JSON.stringify({pin,action,...payload})}); }
+  catch(e){ throw new Error("通信に失敗しました。電波の良い場所でお試しください"); }
+  let j={}; try{ j=await r.json(); }catch(e){}
+  if(!r.ok) throw new Error(j.error||`削除機能がエラーを返しました (${r.status})。Edge Function「felix-record」を確認してください`);
+  return j;
+}
 async function upload(blob, name){
   const r = await fetch(`${SB_URL}/storage/v1/object/photos/${name}`, {
     method:"POST", headers:{...H,"Content-Type":"image/jpeg","Cache-Control":"public, max-age=31536000, immutable"}, body: blob});
@@ -430,7 +440,12 @@ function recHtml(r,tn){
     工種を変更<select data-ew="${esc(id)}">${[...new Set([...(w&&!wopts.includes(w)?[w]:[]),...wopts])].map(o=>`<option ${o===w?"selected":""}>${esc(o)}</option>`).join("")}</select>
     指摘箇所の写真を差し替える（任意）<div class="edit-after">${camHtmlEdit(id)}</div><div class="edit-prev"></div>
     <div class="row"><button class="btn btn-primary" data-es="${esc(id)}">更新を保存</button></div>
-    <div class="info warn" style="margin-top:10px">※指摘の削除は、これまでの画面（旧アプリ）で行ってください。</div>
+    <div class="row" style="margin-top:14px;border-top:1px solid var(--line);padding-top:10px">
+      <div style="font-size:13px;color:var(--gray);margin-bottom:6px">削除（完了済みの指摘は削除できません）</div>
+      ${r.issue_photo_url?`<button class="btn btn-danger" style="margin-bottom:8px" data-dp="${esc(id)}" data-dw="issue">指摘箇所の写真（Before）だけを削除</button>`:""}
+      ${r.fix_photo_url?`<button class="btn btn-danger" style="margin-bottom:8px" data-dp="${esc(id)}" data-dw="fix">是正写真（After）だけを削除${wait?"":"（是正待ちに戻ります）"}</button>`:""}
+      <button class="btn btn-danger" data-dr="${esc(id)}">この指摘を削除（写真も含む）</button>
+    </div>
   </details>`;
   return `<div class="rec" data-id="${esc(id)}">
     <h3>${esc(title)}<span class="st ${wait?"wait":"conf"}">${wait?"写真待ち":"確認待ち"}</span></h3>
@@ -502,6 +517,21 @@ function bindRecs(list,pn,tn,allRecs,redraw){
       editPending[id]={...set,url:URL.createObjectURL(set.full)};
       prev.innerHTML=`<img src="${editPending[id].url}" style="width:50%;border-radius:8px" alt="プレビュー">`;
     }catch(err){ prev.innerHTML=`<div class="err">写真を読み込めませんでした。</div>`; }
+  });
+  // 写真だけを削除／指摘ごと削除
+  document.querySelectorAll("[data-dp]").forEach(btn=>btn.onclick=async()=>{
+    const id=btn.dataset.dp, w=btn.dataset.dw, nm=w==="issue"?"指摘箇所の写真（Before）":"是正写真（After）";
+    if(!confirm(`${nm}を削除します。よろしいですか？`+(w==="fix"&&find(id).progress_status==="是正確認中"?"\n（この指摘は「是正待ち」に戻ります）":""))) return;
+    const old=btn.textContent; btn.disabled=true; btn.innerHTML=`<span class="sp" style="border-color:#c0392b55;border-top-color:#c0392b"></span>削除中…`;
+    try{ const x=await callRec("delete_photo",{id,which:w}); toast(x.deleted?"写真を削除しました":(x.note||"すでに削除されています")); render(); }
+    catch(e){ btn.disabled=false; btn.textContent=old; toast("削除に失敗しました："+e.message,false); }
+  });
+  document.querySelectorAll("[data-dr]").forEach(btn=>btn.onclick=async()=>{
+    const id=btn.dataset.dr;
+    if(!confirm("この指摘を、写真も含めて削除します。元に戻せません。\nよろしいですか？")) return;
+    const old=btn.textContent; btn.disabled=true; btn.innerHTML=`<span class="sp" style="border-color:#c0392b55;border-top-color:#c0392b"></span>削除中…`;
+    try{ const x=await callRec("delete_record",{id}); toast(x.deleted?"指摘を削除しました":(x.note||"すでに削除されています")); render(); }
+    catch(e){ btn.disabled=false; btn.textContent=old; toast("削除に失敗しました："+e.message,false); }
   });
   document.querySelectorAll("[data-es]").forEach(btn=>btn.onclick=async()=>{
     const id=btn.dataset.es, box=btn.closest(".rec"), msg=box.querySelector(".msg");
