@@ -307,8 +307,20 @@ async function renderList(fromCache){
   view.innerHTML=html;
 
   view.querySelectorAll("[data-area]").forEach(b=>b.onclick=()=>{areaSel=b.dataset.area; lsSet("felix_admin_area",areaSel); renderList(true);});
-  const onq=e=>{ if(e.isComposing) return; const old=e.target; q_search=old.value; renderList(true).then(()=>{ const nq=$("#q"); if(nq&&nq!==old){ nq.replaceWith(old); old.oninput=onq; old.oncompositionend=onq; } old.focus(); old.setSelectionRange(old.value.length,old.value.length); }); };
-  $("#q").oninput=onq; $("#q").oncompositionend=onq;   // 日本語の変換中は再描画しない（変換が壊れるため）
+  // ★2026/11/26 検索が効かない不具合の修正：IME（日本語変換）の確定を取りこぼさないように、入力・確定・変更のどれでも検索を実行する。
+  //   （原因：確定を受け取るはずの oncompositionend は存在しない属性で、一度も呼ばれていなかった）
+  //   変換中は再描画を保留（変換が壊れるため）。確定の通知が来なくても、入力が止まって約2.5秒たてば検索する。
+  let _qT=null,_qComp=false;
+  const runQ=inp=>{ clearTimeout(_qT); q_search=inp.value; renderList(true).then(()=>{ const nq=$("#q"); if(nq&&nq!==inp){ nq.replaceWith(inp); bindQ(inp); } inp.focus(); try{ inp.setSelectionRange(inp.value.length,inp.value.length); }catch(e){} }); };
+  const schedQ=(inp,ms)=>{ clearTimeout(_qT); _qT=setTimeout(()=>runQ(inp),ms); };
+  const bindQ=inp=>{
+    if(inp._qBound)return; inp._qBound=true;   // 同じ入力欄に二重登録しない（※oncompositionend という属性は存在せず、これが検索不具合の原因だった）
+    inp.addEventListener("compositionstart",()=>{ _qComp=true; });
+    inp.addEventListener("compositionend",()=>{ _qComp=false; schedQ(inp,0); });
+    inp.addEventListener("input",e=>{ if(e&&e.isComposing===false) _qComp=false; else if(e&&e.isComposing===true) _qComp=true; schedQ(inp,_qComp?2500:150); });
+    inp.addEventListener("change",()=>{ _qComp=false; schedQ(inp,0); });
+  };
+  bindQ($("#q"));
   view.querySelectorAll(".type-btn").forEach(b=>b.onclick=()=>go(b.dataset.p,b.dataset.t));
   view.querySelectorAll("[data-shp]").forEach(b=>b.onclick=()=>openShare(b.dataset.shp,b.dataset.sht));
   view.querySelectorAll(".delay").forEach(inp=>inp.onchange=async()=>{
