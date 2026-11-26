@@ -87,6 +87,7 @@ const SB_URL = "https://vzuzeymvyftmfuaxrvtb.supabase.co";
 const SB_KEY = "sb_publishable_2y-rvfayu8BYs0oo-UOzGA_EQTBYLxm";
 const H = {apikey: SB_KEY, Authorization: "Bearer " + SB_KEY};
 const SHANAI = ["社内検査(設計)", "社内検査(建設)", "社内検査(マーケ)", "社内検査(不動産)"];
+const SPECIAL = ["配筋検査", "躯体検査", "断熱検査", "中間検査"];   // 付け替えは、同じ仲間の検査種類どうしのみ可能（社内検査どうし／配筋〜中間どうし）
 const AREA_ORDER = ["玄関","トイレ","キッチン","バルコニー","LDK","洋室","洗面室","UB","廊下・階段・ENT","外部","フリー項目"];
 const WORK_ORDER = ["A.リペア","B.清掃","C.クロス","D.造作","E.水道","F.電気","G.キッチン","H.サッシ","I.外壁","J.外構","K.コーキング","L.ガス","板金","Z.その他"];
 const WORK_SHANAI = ["A.リペア","B.清掃","C.クロス","D.造作","E.水道","F.電気","G.キッチン","H.サッシ","I.外壁","J.外構","K.コーキング","L.ガス","板金","Z.その他"];
@@ -369,13 +370,34 @@ async function renderDetail(pn,tn){
     html+=`<div><i class="i i-wrench"></i> 担当工種で絞り込む</div><select id="fwork"><option>すべて表示</option>${ws.map(f=>`<option>${esc(f)}</option>`).join("")}</select>`;
   }
   const others=props.filter(x=>x.property_name!==pn);
+  // ★2026/11/26 検査種類の付け替え（検査種類を間違えて選んだ場合）。1回分の検査ごとに選んで変更できる
+  const fam=SHANAI.includes(tn)?SHANAI:(SPECIAL.includes(tn)?SPECIAL:null);
+  const grp=ins.filter(i=>i.property_name===pn&&i.inspection_type===tn).sort((a,b)=>String(a.inspection_date||"").localeCompare(String(b.inspection_date||"")));
+  const cntOf=id=>recs.filter(r=>String(r.inspection_id)===String(id)).length;
+  const typeBlock=fam?`<details class="sub"><summary><i class="i i-refresh"></i> この検査の種類を変更する（検査種類を間違えて選んだ場合）</summary>
+    <div class="info warn">※変更したい回の検査にチェックを入れてください。その回の指摘すべてが、選んだ検査種類に移ります。写真の黒板の文字（検査種類）は変わりません。</div>
+    ${grp.map(i=>`<label style="display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px"><input type="checkbox" class="tpchk" value="${esc(i.inspection_id)}" ${grp.length===1?"checked":""} style="width:auto;margin-top:3px"><span>検査日 ${esc(i.inspection_date||"-")} ／ 検査員 ${esc(i.inspector||"-")} ／ 未完了の指摘 ${cntOf(i.inspection_id)}件</span></label>`).join("")}
+    <div style="margin-top:10px">変更後の検査種類</div>
+    <select id="tpsel">${fam.filter(x=>x!==tn).map(x=>`<option>${esc(x)}</option>`).join("")}</select>
+    <button class="btn btn-amber" id="tpbtn">この検査種類に変更する</button>
+  </details>`:"";
   html+=`<details class="sub"><summary><i class="i i-refresh"></i> この検査の物件を変更する（間違えて登録した場合）</summary>
     <div class="info warn">※この検査に含まれるすべての写真と指摘データを、別の物件に移動させます。</div>
     ${others.length?`<select id="mvsel">${others.map(x=>`<option value="${esc(x.property_id)}">[${esc(x.area)}] ${esc(x.property_name)}</option>`).join("")}</select>
       <button class="btn btn-amber" id="mvbtn">この物件にデータを移動する</button>`:`<div class="info">他に移動できる物件がありません。</div>`}
-  </details><div id="recs"></div><div id="bulk"></div>`;
+  </details>${typeBlock}<div id="recs"></div><div id="bulk"></div>`;
   view.innerHTML=html;
   $("#back").onclick=()=>go();
+  $("#tpbtn")?.addEventListener("click", async()=>{
+    const chosen=[...document.querySelectorAll(".tpchk:checked")].map(x=>x.value), nt=$("#tpsel").value;
+    if(!chosen.length){ toast("変更する回の検査にチェックを入れてください",false); return; }
+    const n=chosen.reduce((a,id)=>a+cntOf(id),0);
+    if(!confirm(`「${tn}」→「${nt}」に変更します。\n対象：${chosen.length}回分の検査（未完了の指摘 ${n}件）\nよろしいですか？`)) return;
+    const btn=$("#tpbtn"); btn.disabled=true; btn.innerHTML=`<span class="sp"></span>変更中…`;
+    let ng=0; for(const id of chosen){ try{ await spatch("inspections","inspection_id",id,{inspection_type:nt}); }catch(e){ ng++; } }
+    if(ng){ btn.disabled=false; btn.textContent="この検査種類に変更する"; toast(`${ng}件の変更に失敗しました。もう一度お試しください`,false); return; }
+    toast(`「${nt}」に変更しました`); go(pn,nt);
+  });
   $("#mvbtn")?.addEventListener("click", async()=>{
     const np=others.find(x=>String(x.property_id)===$("#mvsel").value);
     if(!np||!confirm(`「${np.property_name}」へこの検査のデータをすべて移動します。よろしいですか？`)) return;
